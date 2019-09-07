@@ -42,6 +42,13 @@ class FloatingWidget(QtWidgets.QWidget):
         # set the background invisible
         self.setAttribute(Qt.WA_TranslucentBackground)
 
+        # sets this for MacOS (keep tool on top and hides the rocket icon)
+        if sys.platform == 'darwin':
+            self.setAttribute(Qt.WA_MacAlwaysShowToolWindow)
+            import AppKit
+            info = AppKit.NSBundle.mainBundle().infoDictionary()
+            info["LSBackgroundOnly"] = "1"
+
         # now sets the image to label
         self.label.setPixmap(self.pix)
 
