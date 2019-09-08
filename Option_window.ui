@@ -32,24 +32,24 @@
       <x>30</x>
       <y>0</y>
       <width>400</width>
-      <height>309</height>
+      <height>301</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <property name="spacing">
-      <number>5</number>
+      <number>0</number>
      </property>
      <property name="leftMargin">
       <number>10</number>
      </property>
      <property name="topMargin">
-      <number>15</number>
+      <number>5</number>
      </property>
      <property name="rightMargin">
       <number>10</number>
      </property>
      <property name="bottomMargin">
-      <number>15</number>
+      <number>8</number>
      </property>
      <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
       <widget class="QTabWidget" name="tabWidget">
@@ -69,7 +69,7 @@
         <enum>QTabWidget::North</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <property name="iconSize">
         <size>
@@ -399,8 +399,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>379</width>
-            <height>274</height>
+            <width>371</width>
+            <height>261</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_3">
