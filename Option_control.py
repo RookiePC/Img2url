@@ -1,7 +1,6 @@
 from OptionWindow import OptionWindow
 from Options_data import Options, WorkMode
 import requests
-import json
 
 
 class OptionControl:
@@ -104,7 +103,7 @@ class OptionControl:
         _data.quick_recover_hot_key = _window.quick_recover_edit.text()
         _data.log_save_path = _window.log_path_edit.text()
 
-        if _window.keyword_replace_mode_radiobutton.isChecked() :
+        if _window.keyword_replace_mode_radiobutton.isChecked():
             _data.work_mode = WorkMode.key_word_replace_mode
         else:
             _data.work_mode = WorkMode.hot_key_mode
@@ -138,7 +137,7 @@ class OptionControl:
             self.option_window.pop_message_box('Unknown error', ex.strerror)
         else:
             # tests the status code and the response text
-            if res.status_code == 200 and res.text == '"pong"':
+            if res.status_code == 200 and res.json() == 'pong':
                 return True
             else:
                 self.option_window.pop_message_box('Web api check failed', 'Failed to connect to web api, check if '
@@ -156,8 +155,8 @@ class OptionControl:
         try:
             res = requests.post(self.option_window.domain_edit.text() + '/api2/auth-token/',
                                 data={
-                                    'username':self.option_window.usr_edit.text(),
-                                    'password':self.option_window.pwd_edit.text()
+                                    'username': self.option_window.usr_edit.text(),
+                                    'password': self.option_window.pwd_edit.text()
                                 })
 
         # catch all exception with request session,
@@ -172,7 +171,7 @@ class OptionControl:
             label.setText('Authentication failed. Username or Password Wrong')
             return None
 
-        return json.loads(res.text)['token']
+        return res.json()['token']
 
     def list_library(self):
         """
@@ -197,14 +196,8 @@ class OptionControl:
         lib_combo_box = self.option_window.library_comboBox
 
         # filter libraries make sure no duplicated library showed in combo box
-        for item in json.loads(res.text):
+        for item in res.json():
             repo_id = item['id']
             if repo_id not in repo_id_set:
                 lib_combo_box.addItem(item['name'] + '-' + repo_id)
                 repo_id_set.append(repo_id)
-
-    def check_image(self):
-        """
-        check the
-        :return:
-        """

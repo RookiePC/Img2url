@@ -2,6 +2,7 @@ import sys
 
 from PySide2 import QtCore, QtWidgets
 from PySide2.QtCore import Qt
+from PySide2.QtGui import QIntValidator, QValidator
 from PySide2.QtWidgets import QMainWindow, QApplication, QMessageBox
 
 
@@ -78,6 +79,7 @@ class OptionWindow(QMainWindow):
         self.reset_button = QtWidgets.QPushButton(self.verticalLayoutWidget)
         self.save_button = QtWidgets.QPushButton(self.verticalLayoutWidget)
 
+        self.set_up_simple_interaction()
         self.setup_ui()
         self.translate_ui()
 
@@ -215,6 +217,7 @@ class OptionWindow(QMainWindow):
 
         self.image_size_edit.setMinimumSize(QtCore.QSize(240, 20))
         self.image_size_edit.setObjectName("image_size_edit")
+        self.image_size_edit.setValidator(ImgSizeValidator())
         self.gridLayout_2.addWidget(self.image_size_edit, 2, 1, 1, 1)
 
         self.quick_pause_edit.setObjectName("quick_pause_edit")
@@ -258,6 +261,7 @@ class OptionWindow(QMainWindow):
         self.gridLayout_4.addWidget(self.keyword_replace_mode_radiobutton, 0, 0, 1, 1)
 
         self.timeout_edit.setObjectName("timeout_edit")
+        self.timeout_edit.setValidator(QIntValidator())
         self.gridLayout_4.addWidget(self.timeout_edit, 3, 1, 1, 1)
 
         self.gridLayout_4.addWidget(self.label_5, 7, 0, 1, 1)
@@ -335,7 +339,46 @@ class OptionWindow(QMainWindow):
         self.reset_button.setText(_translate("MainWindow", "Reset"))
         self.save_button.setText(_translate("MainWindow", "Save"))
 
-    def pop_message_box(self, title:str, message: str):
+    def set_up_simple_interaction(self):
+        """
+        sets simple interaction on ui, no core function related
+        :return: None
+        """
+        self.keyword_replace_mode_radiobutton.toggled.connect(self.on_keyword_radiobutton_toggled)
+        self.hot_key_mode_radiobutton.toggled.connect(self.on_hot_key_radiobutton_toggled)
+
+    def on_keyword_radiobutton_toggled(self, enable):
+        if enable:
+            self.set_hot_key_elements(False)
+            self.set_key_word_replace_elements(True)
+
+    def on_hot_key_radiobutton_toggled(self, enable):
+        if enable:
+            self.set_hot_key_elements(True)
+            self.set_key_word_replace_elements(False)
+
+    def set_key_word_replace_elements(self, enable: bool):
+        """
+        disables all relevant elements under key word replace mode
+        :param enable: status to set
+        :return: None
+        """
+        self.substitute_keyword_edit.setEnabled(enable)
+        self.trigger_key_edit.setEnabled(enable)
+        self.timeout_edit.setEnabled(enable)
+        self.ignore_prefix_checkbox.setEnabled(enable)
+
+    def set_hot_key_elements(self, enable: bool):
+        """
+        disables all relevant elements under hot key mode
+        :param enable: status to set
+        :return: None
+        """
+        self.hot_key_edit.setEnabled(enable)
+        self.multi_key_mode_checkbox.setEnabled(enable)
+
+    @staticmethod
+    def pop_message_box(title: str, message: str):
         """
         pops a message box to notify something
         :param title: message box title to display
@@ -346,6 +389,25 @@ class OptionWindow(QMainWindow):
         message_box.setWindowTitle(title)
         message_box.setText(message)
         message_box.exec_()
+
+
+class ImgSizeValidator(QValidator):
+    def validate(self, arg__1: str, arg__2: int) -> QValidator.State:
+        if len(arg__1) == 0:
+            return QValidator.Intermediate
+
+        if arg__1.isalpha():
+            return QValidator.Invalid
+
+        if arg__1.isdigit():
+            try:
+                value = int(arg__1)
+            except ValueError:
+                return QValidator.Invalid
+            if value <= 1024:
+                return QValidator.Acceptable
+
+        return QValidator.Invalid
 
 
 if __name__ == '__main__':

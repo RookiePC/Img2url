@@ -211,7 +211,7 @@ class Options:
 
         return True
 
-    def read_authorization_settings(self, authorization_section:configparser.SectionProxy):
+    def read_authorization_settings(self, authorization_section: configparser.SectionProxy):
         """
         read settings from given sections, if no value found, no value would change
         :param authorization_section: the authorization in config
@@ -221,7 +221,7 @@ class Options:
         self.auth_token = authorization_section.get('auth_token', self.auth_token)
         self.upload_repo_id = authorization_section.get('upload_repo_id', self.upload_repo_id)
 
-    def read_general_settings(self, general_section:configparser.SectionProxy):
+    def read_general_settings(self, general_section: configparser.SectionProxy):
         """
         read settings from given sections, if no value found, no value would change
         better be called after the reset so the variables won't be None
@@ -235,7 +235,7 @@ class Options:
         self.quick_recover_hot_key = general_section.get('quick_recover', self.quick_recover_hot_key)
         self.log_save_path = general_section.get('log_path', self.log_save_path)
 
-    def read_work_mode_settings(self, work_mode_section:configparser.SectionProxy):
+    def read_work_mode_settings(self, work_mode_section: configparser.SectionProxy):
         """
         read settings from given sections, if no value found, no value would change
         better be called after the reset so the variables won't be None
