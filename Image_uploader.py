@@ -80,6 +80,6 @@ class ImageUploader:
         else:
             raise Exception('Failed to get image share link with ' + str(res.status_code))
 
-    def copy_to_clipboard(self, share_link: str, image_name: str):
+    def form_image_url(self, share_link: str, image_name: str) -> str:
         img_url = share_link.replace('/f/', '/thumbnail/') + '/' + str(self.option_data.size) + '/' + image_name
-        pyperclip.copy(self.option_data.paste_format.replace('{url}', img_url))
+        return self.option_data.paste_format.replace('{url}', img_url)
