@@ -390,6 +390,20 @@ class OptionWindow(QMainWindow):
         message_box.setText(message)
         message_box.exec_()
 
+    @staticmethod
+    def confirm_operation(title: str, message: str):
+        """
+        pops message for user to confirm operation
+        :param title: message box title to display
+        :param message: message text content to display inside the box
+        :return: True if confirms to continue
+        """
+        message_box = QMessageBox()
+        message_box.setWindowTitle(title)
+        message_box.setText(message)
+        message_box.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+        return message_box.exec_() == QMessageBox.Yes
+
 
 class ImgSizeValidator(QValidator):
     def validate(self, arg__1: str, arg__2: int) -> QValidator.State:

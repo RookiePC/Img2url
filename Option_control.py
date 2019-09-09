@@ -4,11 +4,11 @@ import requests
 
 
 class OptionControl:
-    def __init__(self):
+    def __init__(self, option_ref: Options):
         super().__init__()
 
         self.option_window = OptionWindow()
-        self.option_data = Options()
+        self.option_data = option_ref
 
         self.supported_img_format = [
             'PNG',
@@ -201,3 +201,26 @@ class OptionControl:
             if repo_id not in repo_id_set:
                 lib_combo_box.addItem(item['name'] + '-' + repo_id)
                 repo_id_set.append(repo_id)
+
+    def on_save_clicked(self):
+        # read settings from window
+        self.read_settings()
+        # save to config
+        self.option_data.save_config_to_local()
+
+    def on_reset_clicked(self):
+        if self.option_window.confirm_operation('Please Confirm', 'The reset process will clear all settings and '
+                                                                  'restore initial settings, confirm to continue?'):
+            self.option_data.reset_all()
+            self.option_data.save_config_to_local()
+            self.fill_data()
+
+    def set_interaction(self):
+        self.option_window.save_button.clicked.connect(self.on_save_clicked)
+        self.option_window.reset_button.clicked.connect(self.on_reset_clicked)
+
+    def show_option_window(self):
+        self.option_window.show()
+
+    def hide_option_window(self):
+        self.option_window.hide()
