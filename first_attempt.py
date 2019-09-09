@@ -6,7 +6,7 @@ from PySide2.QtWidgets import QLabel, QGraphicsDropShadowEffect, QMenu, QSystemT
 
 
 class FloatingWidget(QtWidgets.QWidget):
-    def __init__(self, screen:QScreen):
+    def __init__(self, screen: QScreen):
         super().__init__()
 
         self.pix = QPixmap(QImage('favicon.ico'))
@@ -128,7 +128,7 @@ class FloatingWidget(QtWidgets.QWidget):
         # self.tray_icon.showMessage("test", "hello there!", QSystemTrayIcon.Information, 500)
         self.tray_icon.setToolTip('Still living')
 
-    def contextMenuEvent(self, event:QtGui.QContextMenuEvent):
+    def contextMenuEvent(self, event: QtGui.QContextMenuEvent):
         self.context_menu.exec_(self.mapToGlobal(event.pos()))
 
     def mousePressEvent(self, event):
@@ -144,7 +144,7 @@ class FloatingWidget(QtWidgets.QWidget):
             self.move(self.re_map_pos(event.pos() - self.pos))
         event.accept()
 
-    def re_map_pos(self, pos:QPoint) -> QPoint:
+    def re_map_pos(self, pos: QPoint) -> QPoint:
         """
         re map the position of the app, to prevent dragging it to outer space
         :param pos: a QPoint that app would move to
@@ -159,7 +159,7 @@ class FloatingWidget(QtWidgets.QWidget):
         pos = self.mapToGlobal(pos)
 
         # set it back on border if it's out
-        if pos.x() > width :
+        if pos.x() > width:
             pos.setX(width)
         elif pos.x() < 0:
             pos.setX(0)

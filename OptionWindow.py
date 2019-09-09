@@ -2,7 +2,7 @@ import sys
 
 from PySide2 import QtCore, QtWidgets
 from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QMainWindow, QApplication
+from PySide2.QtWidgets import QMainWindow, QApplication, QMessageBox
 
 
 class OptionWindow(QMainWindow):
@@ -137,6 +137,7 @@ class OptionWindow(QMainWindow):
 
         self.status_label.setMaximumSize(QtCore.QSize(300, 40))
         self.status_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.status_label.setObjectName('status_label')
         self.verticalLayout_2.addWidget(self.status_label)
 
         self.horizontalLayout_4.setSpacing(0)
@@ -333,6 +334,18 @@ class OptionWindow(QMainWindow):
         self.auth_check_button.setText(_translate("MainWindow", "Authenticate"))
         self.reset_button.setText(_translate("MainWindow", "Reset"))
         self.save_button.setText(_translate("MainWindow", "Save"))
+
+    def pop_message_box(self, title:str, message: str):
+        """
+        pops a message box to notify something
+        :param title: message box title to display
+        :param message: message text to display inside the box
+        :return: None
+        """
+        message_box = QMessageBox()
+        message_box.setWindowTitle(title)
+        message_box.setText(message)
+        message_box.exec_()
 
 
 if __name__ == '__main__':
