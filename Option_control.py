@@ -1,3 +1,26 @@
+"""
+MIT License
+
+Copyright (c) 2019 RookiePC
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 from OptionWindow import OptionWindow
 from Options_data import Options, WorkMode
 import requests
@@ -9,7 +32,7 @@ class OptionControl:
 
         self.option_window = OptionWindow()
         self.option_data = option_ref
-
+        self.option_window.auth_check_button.clicked.connect(self.on_authenticate_check_clicked)
         self.supported_img_format = [
             'PNG',
             'JPG',
@@ -18,7 +41,7 @@ class OptionControl:
 
     def fill_data(self):
         """
-        fills options window with option_data's content
+        fills line edit in options window with option_data's content
         :return:
         """
         _window = self.option_window
@@ -31,17 +54,16 @@ class OptionControl:
         # if has the auth token, fill it in the edit and change label, disable the pwd edit
         # shows the library label and combo box
         if _data.auth_token != '':
-            _window.usr_edit.setText(_data.auth_token)
-            _window.username_label.setText('Auth Token')
-            _window.pwd_edit.setEnabled(False)
-            _window.library_label.show()
-            _window.library_comboBox.show()
+            _window.status_label.setText('Auth Token:' + _data.auth_token)
+            _window.status_label.setStyleSheet('QLabel#status_label {color: green}')
+            _window.status_label.show()
+            self.list_library()
         # else fill the two edit with empty str, and hide the library relevant content
         else:
             _window.usr_edit.setText('')
             _window.pwd_edit.setText('')
-            _window.username_label.setText('Username')
-            _window.pwd_edit.setEnabled(True)
+            _window.status_label.setStyleSheet('QLabel#status_label {color: black}')
+            _window.status_label.hide()
             _window.library_label.hide()
             _window.library_comboBox.hide()
 
@@ -52,9 +74,9 @@ class OptionControl:
 
         _window.img_type_combobox.setCurrentText(_data.type)
 
-        _window.image_size_edit.setText(_data.size)
+        _window.image_size_edit.setText(str(_data.size))
 
-        _window.paste_format_edit.setText(_data.paste_format)
+        _window.paste_format_edit.insertPlainText(_data.paste_format)
 
         _window.quick_pause_edit.setText(_data.quick_pause_hot_key)
 
@@ -72,11 +94,11 @@ class OptionControl:
 
         _window.substitute_keyword_edit.setText(_data.substitute_keyword)
         _window.trigger_key_edit.setText(_data.trigger_key)
-        _window.timeout_edit.setText(_data.timeout)
+        _window.timeout_edit.setText(str(_data.timeout))
         _window.ignore_prefix_checkbox.setChecked(_data.ignore_prefix)
 
         _window.hot_key_edit.setText(_data.hot_key)
-        _window.multi_key_mode_checkbox.setText(_data.multi_key_mode)
+        # _window.multi_key_mode_checkbox.setEnabled(_data.multi_key_mode)
 
     def read_settings(self):
         """
@@ -89,9 +111,9 @@ class OptionControl:
         _data.domain = _window.domain_edit.text()
 
         # sets the auth token if already authenticated
-        if _window.username_label.text() == 'Auth Token':
-            _data.auth_token = _window.username_label.text()
-            _data.upload_repo_id = _window.library_comboBox.currentText().split('-')[-1]
+        if _window.status_label.text().startswith('Auth Token'):
+            _data.auth_token = _window.status_label.text().split(':')[-1]
+            _data.upload_repo_id = _window.library_comboBox.currentText().split(' ^-^ ')[-1]
         else:
             _data.auth_token = ''
             _data.upload_repo_id = ''
@@ -114,7 +136,7 @@ class OptionControl:
         _data.ignore_prefix = _window.ignore_prefix_checkbox.isChecked()
 
         _data.hot_key = _window.hot_key_edit.text()
-        _data.multi_key_mode = _window.multi_key_mode_checkbox.isChecked()
+        # _data.multi_key_mode = _window.multi_key_mode_checkbox.isChecked()
 
     def domain_check(self) -> bool:
         """
@@ -124,7 +146,7 @@ class OptionControl:
         :return: True if seafile service available, else False
         """
         domain_edit = self.option_window.domain_edit
-        if not domain_edit.text().startswith('http://') or not domain_edit.text().startswith('https://'):
+        if not domain_edit.text().startswith('http://') and not domain_edit.text().startswith('https://'):
             domain_edit.setText('http://' + domain_edit.text())
 
         try:
@@ -182,7 +204,9 @@ class OptionControl:
         try:
             res = requests.get(
                 url=self.option_window.domain_edit.text() + '/api2/repos/',
-                headers={'Authorization': 'Token {token}'.format(token=self.option_window.usr_edit.text())}
+                headers={
+                    'Authorization': 'Token {token}'.format(token=self.option_window.status_label.text().split(':')[-1])
+                }
             )
         except requests.exceptions.RequestException as ex:
             self.option_window.pop_message_box('Failed fetching libraries', ex.strerror)
@@ -194,13 +218,33 @@ class OptionControl:
 
         repo_id_set = []
         lib_combo_box = self.option_window.library_comboBox
+        lib_combo_box.show()
+        self.option_window.library_label.show()
 
         # filter libraries make sure no duplicated library showed in combo box
         for item in res.json():
             repo_id = item['id']
             if repo_id not in repo_id_set:
-                lib_combo_box.addItem(item['name'] + '-' + repo_id)
+                lib_combo_box.addItem(item['name'] + ' ^-^ ' + repo_id)
                 repo_id_set.append(repo_id)
+
+    def on_selection_changed(self, text: str):
+        self.option_data.upload_repo_id = text.split(' ^-^ ')[-1]
+
+    def on_authenticate_check_clicked(self):
+        if not self.domain_check():
+            return
+
+        token = self.authentication_check()
+
+        if token is None:
+            return
+
+        self.option_window.status_label.show()
+        self.option_window.status_label.setText('Auth Token:' + token)
+        self.option_window.status_label.setStyleSheet('QLabel#status_label {color: green}')
+
+        self.list_library()
 
     def show_option_window(self):
         self.option_window.show()

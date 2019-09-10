@@ -1,15 +1,46 @@
+"""
+MIT License
+
+Copyright (c) 2019 RookiePC
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import sys
+import enum
 from PySide2 import QtWidgets,QtGui
 from PySide2.QtCore import Qt, QCoreApplication, QPoint
 from PySide2.QtGui import QPixmap, QImage, QCursor, QScreen, QIcon
 from PySide2.QtWidgets import QLabel, QGraphicsDropShadowEffect, QMenu, QSystemTrayIcon
 
 
+class DisplayMode(enum.Enum):
+    normal_no_hook = 0,
+    normal_hook_installed = 1,
+    ready_to_paste = 2,
+    cant_work_normally = 3
+
+
 class FloatingWidget(QtWidgets.QWidget):
     def __init__(self, screen: QScreen):
         super().__init__()
 
-        self.pix = QPixmap(QImage('favicon.ico'))
+        self.pix = QPixmap(QImage('icons/favicon_gray.ico'))
         self.pos = None
         self.label = QLabel(self)
         self.layout = QtWidgets.QVBoxLayout()
@@ -20,6 +51,9 @@ class FloatingWidget(QtWidgets.QWidget):
         self.screen_size = screen.size
 
         self.menu_action_hide = None
+        self.menu_action_options = None
+        self.menu_action_quick_hook = None
+        self.menu_action_unhook = None
         self.context_menu = None
         self.init_context_menu()
 
@@ -70,15 +104,35 @@ class FloatingWidget(QtWidgets.QWidget):
         """
         self.context_menu = QMenu()
 
-        menu_action_options = self.context_menu.addAction('options')
-        self.menu_action_hide = self.context_menu.addAction('hide')
-        menu_action_help = self.context_menu.addAction('help')
-        menu_action_quit = self.context_menu.addAction('quit')
+        self.menu_action_options = self.context_menu.addAction('Options')
+        self.menu_action_quick_hook = self.context_menu.addAction('Quick hook')
+        self.menu_action_unhook = self.context_menu.addAction('Unhook')
+        self.menu_action_hide = self.context_menu.addAction('Hide')
+        menu_action_help = self.context_menu.addAction('Help')
+        menu_action_quit = self.context_menu.addAction('Quit')
 
+        self.menu_action_unhook.setEnabled(False)
         menu_action_quit.triggered.connect(self.context_menu_quit_clicked)
-        menu_action_options.triggered.connect(self.context_menu_options_clicked)
         menu_action_help.triggered.connect(self.context_menu_help_clicked)
         self.menu_action_hide.triggered.connect(self.context_menu_hide_clicked)
+
+    def switch_status(self, mode: DisplayMode):
+        """
+        change the floating widgets appearance by resets the .icon file
+        :param mode: determines the .icon to use
+        :return:None
+        """
+        if mode == DisplayMode.normal_no_hook:
+            self.pix = QPixmap(QImage('icons/favicon_gray.ico'))
+        elif mode == DisplayMode.normal_hook_installed:
+            self.pix = QPixmap(QImage('icons/favicon_blue.ico'))
+        elif mode == DisplayMode.ready_to_paste:
+            self.pix = QPixmap(QImage('icons/favicon_green.ico'))
+        else:
+            self.pix = QPixmap(QImage('icons/favicon_orange.ico'))
+
+        self.label.setPixmap(self.pix)
+
 
     def context_menu_quit_clicked(self, event):
         """
@@ -87,14 +141,6 @@ class FloatingWidget(QtWidgets.QWidget):
         :return:
         """
         QCoreApplication.quit()
-
-    def context_menu_options_clicked(self, event):
-        """
-        TODO: shows options window .
-        :param event:
-        :return: None
-        """
-        print('Options clicked')
 
     def context_menu_help_clicked(self, event):
         """
@@ -122,11 +168,22 @@ class FloatingWidget(QtWidgets.QWidget):
         initialises the tray icon, called after the original context menu initialed.
         :return: None
         """
-        self.tray_icon = QSystemTrayIcon(QIcon('favicon.ico'))
+        self.tray_icon = QSystemTrayIcon(QIcon('icons/favicon.ico'))
         self.tray_icon.show()
         self.tray_icon.setContextMenu(self.context_menu)
         # self.tray_icon.showMessage("test", "hello there!", QSystemTrayIcon.Information, 500)
         self.tray_icon.setToolTip('Still living')
+
+    def show_message(self, title: str, message: str, icon: QSystemTrayIcon, time: int = 300):
+        """
+        pops message on tray icon with given parameters
+        :param title:
+        :param message:
+        :param icon:
+        :param time: default to 300 m-seconds
+        :return: None
+        """
+        self.tray_icon.showMessage(title, message, icon, time)
 
     def contextMenuEvent(self, event: QtGui.QContextMenuEvent):
         self.context_menu.exec_(self.mapToGlobal(event.pos()))

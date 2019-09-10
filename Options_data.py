@@ -1,3 +1,26 @@
+"""
+MIT License
+
+Copyright (c) 2019 RookiePC
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import os
 import enum
 import configparser
@@ -38,7 +61,7 @@ class Options:
 
         # hot-key mode
         self.hot_key: str = ''
-        self.multi_key_mode: bool = False
+        # self.multi_key_mode: bool = False
 
         # quick_pause
         self.quick_pause_hot_key: str = ''
@@ -59,6 +82,7 @@ class Options:
         self.config_init()
 
         # after all member variable declared, inits them with reset method(this would inits the config)
+        # do this before read from local to avoid unexpected error shuts down the application
         self.reset_all()
 
         # if read from local failed which means the config does not exists or not complete, them we save one manually
@@ -138,7 +162,7 @@ class Options:
         self.config_parser['general'] = {
             'type': self.type,
             'size': self.size,
-            'paste_format': self.paste_format,
+            'paste_format': self.paste_format.replace('\n', '<&br />'),
             'quick_pause': self.quick_pause_hot_key,
             'quick_recover': self.quick_recover_hot_key,
             'log_path': self.log_save_path
@@ -153,7 +177,6 @@ class Options:
         ignore_prefix: True
         timeout: 200
         hot_key: f1
-        multi_key_mode: False
         :return:
         """
         self.work_mode = WorkMode.key_word_replace_mode
@@ -162,7 +185,7 @@ class Options:
         self.trigger_key = 'space'
         self.timeout = 200
         self.hot_key = 'f1'
-        self.multi_key_mode = False
+        # self.multi_key_mode = False
 
     def save_work_mode_settings(self):
         """
@@ -176,8 +199,8 @@ class Options:
             'ignore_prefix': self.ignore_prefix,
             'timeout': self.timeout,
             'trigger_key': self.trigger_key,
-            'hot_key': self.hot_key,
-            'multi_key_mode': self.multi_key_mode
+            'hot_key': self.hot_key
+            # 'multi_key_mode': self.multi_key_mode
         }
 
     def save_config_to_local(self):
@@ -186,6 +209,9 @@ class Options:
         does not check content
         :return: None
         """
+        self.save_authorization_settings()
+        self.save_general_settings()
+        self.save_work_mode_settings()
         with open(self.get_default_path() + os.sep + self.config_file_name, 'w') as config_file:
             self.config_parser.write(config_file)
 
@@ -230,7 +256,7 @@ class Options:
         """
         self.type = general_section.get('type', self.type)
         self.size = general_section.getint('size', self.size)
-        self.paste_format = general_section.get('paste_format', self.paste_format)
+        self.paste_format = general_section.get('paste_format', self.paste_format).replace('<&br />', '\n')
         self.quick_pause_hot_key = general_section.get('quick_pause', self.quick_pause_hot_key)
         self.quick_recover_hot_key = general_section.get('quick_recover', self.quick_recover_hot_key)
         self.log_save_path = general_section.get('log_path', self.log_save_path)
@@ -254,7 +280,7 @@ class Options:
         self.timeout = work_mode_section.getint('timeout', self.timeout)
         self.trigger_key = work_mode_section.get('trigger_key', self.trigger_key)
         self.hot_key = work_mode_section.get('hot_key', self.hot_key)
-        self.multi_key_mode = work_mode_section.getboolean('multi_key_mode', self.multi_key_mode)
+        # self.multi_key_mode = work_mode_section.getboolean('multi_key_mode', self.multi_key_mode)
 
     @staticmethod
     def get_default_path() -> str:

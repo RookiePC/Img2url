@@ -1,8 +1,31 @@
+"""
+MIT License
+
+Copyright (c) 2019 RookiePC
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import sys
 
 from PySide2 import QtCore, QtWidgets
 from PySide2.QtCore import Qt
-from PySide2.QtGui import QIntValidator, QValidator
+from PySide2.QtGui import QIntValidator, QValidator, QCloseEvent
 from PySide2.QtWidgets import QMainWindow, QApplication, QMessageBox
 
 
@@ -43,7 +66,7 @@ class OptionWindow(QMainWindow):
         self.workmode_tab = QtWidgets.QWidget()
         self.gridLayout_4 = QtWidgets.QGridLayout(self.workmode_tab)
         self.label_2 = QtWidgets.QLabel(self.workmode_tab)
-        self.label_6 = QtWidgets.QLabel(self.workmode_tab)
+        # self.label_6 = QtWidgets.QLabel(self.workmode_tab)
         self.label = QtWidgets.QLabel(self.workmode_tab)
         self.label_4 = QtWidgets.QLabel(self.workmode_tab)
         self.label_3 = QtWidgets.QLabel(self.workmode_tab)
@@ -68,7 +91,7 @@ class OptionWindow(QMainWindow):
 
         # work mode part
         self.hot_key_edit = QtWidgets.QLineEdit(self.workmode_tab)
-        self.multi_key_mode_checkbox = QtWidgets.QCheckBox(self.workmode_tab)
+        # self.multi_key_mode_checkbox = QtWidgets.QCheckBox(self.workmode_tab)
         self.hot_key_mode_radiobutton = QtWidgets.QRadioButton(self.workmode_tab)
         self.substitute_keyword_edit = QtWidgets.QLineEdit(self.workmode_tab)
         self.trigger_key_edit = QtWidgets.QLineEdit(self.workmode_tab)
@@ -243,8 +266,8 @@ class OptionWindow(QMainWindow):
         self.hot_key_edit.setObjectName("hot_key_edit")
         self.gridLayout_4.addWidget(self.hot_key_edit, 7, 1, 1, 1)
 
-        self.multi_key_mode_checkbox.setObjectName("multi_key_mode_checkbox")
-        self.gridLayout_4.addWidget(self.multi_key_mode_checkbox, 8, 1, 1, 1)
+        # self.multi_key_mode_checkbox.setObjectName("multi_key_mode_checkbox")
+        # self.gridLayout_4.addWidget(self.multi_key_mode_checkbox, 8, 1, 1, 1)
 
         self.hot_key_mode_radiobutton.setObjectName("radioButton_2")
         self.gridLayout_4.addWidget(self.hot_key_mode_radiobutton, 6, 0, 1, 1)
@@ -253,6 +276,9 @@ class OptionWindow(QMainWindow):
         self.gridLayout_4.addWidget(self.substitute_keyword_edit, 1, 1, 1, 1)
 
         self.trigger_key_edit.setObjectName("trigger_key_edit")
+        # TODO: Maybe add a few more trigger key
+        self.trigger_key_edit.setEnabled(False)
+        self.trigger_key_edit.setToolTip('space is the only supported key for now')
         self.gridLayout_4.addWidget(self.trigger_key_edit, 2, 1, 1, 1)
 
         self.gridLayout_4.addWidget(self.label_2, 2, 0, 1, 1)
@@ -269,7 +295,7 @@ class OptionWindow(QMainWindow):
         self.ignore_prefix_checkbox.setObjectName("ignore_prefix_checkbox")
         self.gridLayout_4.addWidget(self.ignore_prefix_checkbox, 4, 1, 1, 1)
 
-        self.gridLayout_4.addWidget(self.label_6, 8, 0, 1, 1)
+        # self.gridLayout_4.addWidget(self.label_6, 8, 0, 1, 1)
 
         self.gridLayout_4.addWidget(self.label, 1, 0, 1, 1)
 
@@ -320,7 +346,7 @@ class OptionWindow(QMainWindow):
         self.image_format_label.setText(_translate("MainWindow", "Image format"))
         self.label_2.setText(_translate("MainWindow", "Trigger Key"))
         self.label_5.setText(_translate("MainWindow", "Hot Key"))
-        self.label_6.setText(_translate("MainWindow", "Multi-key Mode"))
+        # self.label_6.setText(_translate("MainWindow", "Multi-key Mode"))
         self.label.setText(_translate("MainWindow", "Substitute Keyword"))
         self.label_4.setText(_translate("MainWindow", "Timeout"))
         self.label_3.setText(_translate("MainWindow", "Ignore Prefix"))
@@ -364,7 +390,7 @@ class OptionWindow(QMainWindow):
         :return: None
         """
         self.substitute_keyword_edit.setEnabled(enable)
-        self.trigger_key_edit.setEnabled(enable)
+        # self.trigger_key_edit.setEnabled(enable)
         self.timeout_edit.setEnabled(enable)
         self.ignore_prefix_checkbox.setEnabled(enable)
 
@@ -375,7 +401,7 @@ class OptionWindow(QMainWindow):
         :return: None
         """
         self.hot_key_edit.setEnabled(enable)
-        self.multi_key_mode_checkbox.setEnabled(enable)
+        # self.multi_key_mode_checkbox.setEnabled(enable)
 
     @staticmethod
     def pop_message_box(title: str, message: str):
@@ -403,6 +429,10 @@ class OptionWindow(QMainWindow):
         message_box.setText(message)
         message_box.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
         return message_box.exec_() == QMessageBox.Yes
+
+    def closeEvent(self, event: QCloseEvent):
+        event.ignore()
+        self.hide()
 
 
 class ImgSizeValidator(QValidator):
