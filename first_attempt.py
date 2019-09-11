@@ -23,7 +23,7 @@ SOFTWARE.
 """
 import sys
 import enum
-from PySide2 import QtWidgets,QtGui
+from PySide2 import QtWidgets, QtGui
 from PySide2.QtCore import Qt, QCoreApplication, QPoint
 from PySide2.QtGui import QPixmap, QImage, QCursor, QScreen, QIcon
 from PySide2.QtWidgets import QLabel, QGraphicsDropShadowEffect, QMenu, QSystemTrayIcon

@@ -58,7 +58,6 @@ class Img2url:
         self.unhook_hotkey_state = img2url_state.UnhookHotKeyState(self)
         self.keyword_hook_state = img2url_state.KeywordHookState(self)
         self.hot_key_state = img2url_state.HotKeyHookState(self)
-        self.paste_ready_state = img2url_state.PasteReadyState(self)
         self.error_state = img2url_state.ErrorState(self)
 
         self.reset_state()

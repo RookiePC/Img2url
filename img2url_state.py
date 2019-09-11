@@ -141,6 +141,7 @@ class HotKeyHookState(HookState):
     def __init__(self, context: Img2url):
         super().__init__(context)
         self.hook_handler = None
+        self.paste_handler = None
 
     def enter(self):
         super().enter()
@@ -150,49 +151,29 @@ class HotKeyHookState(HookState):
 
     def hot_key_callback(self):
         self.context.hot_key_callback()
-        self.context.state = self.context.paste_ready_state
-        self.context.state.enter()
+        self.context.main_window.switch_display(DisplayMode.ready_to_paste)
+        # only adds the hot key if no previous hot key exists
+        if self.paste_handler is None:
+            self.paste_handler = keyboard.add_hotkey('ctrl+v', self.paste_callback)
+
+    def paste_callback(self):
+        self.context.main_window.switch_display(DisplayMode.normal_hook_installed)
+        keyboard.remove_hotkey(self.paste_handler)
+        self.paste_handler = None
 
     def quit(self):
-        keyboard.remove_hotkey(self.hook_handler)
+        self.reset()
         self.context.state = self.context.unhook_hotkey_state
         self.context.state.enter()
 
     def reset(self):
         keyboard.remove_hotkey(self.hook_handler)
-
-
-class PasteReadyState(HotKeyHookState):
-    """
-    behaves more like a sub state of HotKeyHookState
-    the main purpose is to show that the app is ready to paste the formatted url
-    nothing else
-    """
-    def __init__(self, context: Img2url):
-        super(HotKeyHookState, self).__init__(context)
-
-    def enter(self):
-        self.context.main_window.switch_display(DisplayMode.ready_to_paste)
-        self.context.context_menu_unhook_ref.triggered.disconnect()
-        self.context.context_menu_unhook_ref.triggered.connect(self.unhook_quit)
-        self.hook_handler = keyboard.add_hotkey('ctrl+v', self.quit)
-
-    def unhook_quit(self):
-        keyboard.remove_hotkey(self.hook_handler)
-        self.context.state = self.context.hot_key_state
-        self.context.state.quit()
-
-    def quit(self):
-        self.context.main_window.switch_display(DisplayMode.normal_hook_installed)
-        keyboard.remove_hotkey(self.hook_handler)
-        self.context.state = self.context.hot_key_state
-
-    def reset(self):
-        keyboard.remove_hotkey(self.hook_handler)
-        self.context.state = self.context.hot_key_state
-        self.context.state.reset()
+        if self.paste_handler is not None:
+            keyboard.remove_hotkey(self.paste_handler)
+            self.paste_handler = None
 
 
 class ErrorState(Img2urlState):
     def __init__(self, context: Img2url):
         self.context = context
+
