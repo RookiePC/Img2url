@@ -12,6 +12,6 @@ When triggerd, this little application grab the image in clipboard, upload it to
 * Grab image from clipboard only supports Windows/MacOS (for now)
 * Has to authenticate the application on MacOS or won't be able to listen to keyboard event.
 
-# Specail Thanks
+# Special Thanks
 - UI writes with [PySide2](https://pypi.org/project/PySide2/)
 - hook key board events writing with Python module [keyboard](https://github.com/boppreh/keyboard)
