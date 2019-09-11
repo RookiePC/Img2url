@@ -116,7 +116,7 @@ class FloatingWidget(QtWidgets.QWidget):
         menu_action_help.triggered.connect(self.context_menu_help_clicked)
         self.menu_action_hide.triggered.connect(self.context_menu_hide_clicked)
 
-    def switch_status(self, mode: DisplayMode):
+    def switch_display(self, mode: DisplayMode):
         """
         change the floating widgets appearance by resets the .icon file
         :param mode: determines the .icon to use
@@ -133,8 +133,7 @@ class FloatingWidget(QtWidgets.QWidget):
 
         self.label.setPixmap(self.pix)
 
-
-    def context_menu_quit_clicked(self, event):
+    def context_menu_quit_clicked(self):
         """
         does the job before quit.
         :param event:
@@ -142,7 +141,7 @@ class FloatingWidget(QtWidgets.QWidget):
         """
         QCoreApplication.quit()
 
-    def context_menu_help_clicked(self, event):
+    def context_menu_help_clicked(self):
         """
         shows help as it supposed to do, not implemented yet( TODO: fill this function)
         :param event:
@@ -150,7 +149,7 @@ class FloatingWidget(QtWidgets.QWidget):
         """
         print('help clicked')
 
-    def context_menu_hide_clicked(self, event):
+    def context_menu_hide_clicked(self):
         """
         respond to the hide context menu click event
         :param event: for the interface only, not actually used inside the method

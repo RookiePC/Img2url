@@ -125,6 +125,7 @@ class OptionControl:
         _data.quick_recover_hot_key = _window.quick_recover_edit.text()
         _data.log_save_path = _window.log_path_edit.text()
 
+        _data.original_work_mode = _data.work_mode
         if _window.keyword_replace_mode_radiobutton.isChecked():
             _data.work_mode = WorkMode.key_word_replace_mode
         else:

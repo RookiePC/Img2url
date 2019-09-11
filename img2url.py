@@ -32,6 +32,8 @@ from OptionWindow import OptionWindow
 from Options_data import WorkMode
 import keyboard
 
+import img2url_state
+
 
 class Img2url:
     def __init__(self, app_: QtWidgets.QApplication):
@@ -44,10 +46,33 @@ class Img2url:
 
         self.option_window_ref.save_button.clicked.connect(self.on_save_clicked)
         self.option_window_ref.reset_button.clicked.connect(self.on_reset_clicked)
+
+        self.context_menu_quick_hook_ref = self.main_window.menu_action_quick_hook
+        self.context_menu_unhook_ref = self.main_window.menu_action_unhook
+
         self.main_window.menu_action_options.triggered.connect(self.option_control.show_option_window)
-        self.main_window.menu_action_quick_hook.triggered.connect(self.quick_hook_context_menu_clicked)
-        self.main_window.menu_action_unhook.triggered.connect(self.unhook_context_menu_clicked)
-        self.handler_record = None
+
+        self.state = None
+
+        self.unhook_keyword_state = img2url_state.UnhookKeywordState(self)
+        self.unhook_hotkey_state = img2url_state.UnhookHotKeyState(self)
+        self.keyword_hook_state = img2url_state.KeywordHookState(self)
+        self.hot_key_state = img2url_state.HotKeyHookState(self)
+        self.paste_ready_state = img2url_state.PasteReadyState(self)
+        self.error_state = img2url_state.ErrorState(self)
+
+        self.reset_state()
+
+    def reset_state(self):
+        if self.state is not None:
+            self.state.reset()
+
+        if self.option_data_ref.work_mode == WorkMode.key_word_replace_mode:
+            self.state = self.unhook_keyword_state
+        elif self.option_data_ref.work_mode == WorkMode.hot_key_mode:
+            self.state = self.unhook_hotkey_state
+
+        self.state.enter()
 
     def image_to_url_core(self) -> str:
         """
@@ -83,71 +108,8 @@ class Img2url:
         """
         try:
             pyperclip.copy(self.image_to_url_core())
-            self.main_window.switch_status(DisplayMode.ready_to_paste)
         except Exception as ex:
             OptionWindow.pop_message_box('Error', ex.__str__())
-
-    def quick_hook_context_menu_clicked(self):
-        """
-        adds the key listener with data in option, effects the context menu item Quick hoot and Unhook
-        :return: None
-        """
-        try:
-            self.setup_listener()
-        except Exception as ex:
-            OptionWindow.pop_message_box('Set listener error', ex.__str__())
-            return
-
-        self.main_window.menu_action_quick_hook.setEnabled(False)
-        self.main_window.menu_action_unhook.setEnabled(True)
-
-    def unhook_context_menu_clicked(self):
-        """
-        remove the existing listener, effects the status of item Quick hook and Unhook in context menu
-        :return:
-        """
-        try:
-            self.remove_listener()
-        except Exception as ex:
-            OptionWindow.pop_message_box('Remove listener error', ex.__str__())
-            return
-
-        self.main_window.menu_action_unhook.setEnabled(False)
-        self.main_window.menu_action_quick_hook.setEnabled(True)
-
-    def setup_listener(self):
-        """
-        sets the key listener according to the mode and relevant settings.
-        :return:None
-        """
-        # add new handler according to the settings
-        if self.option_data_ref.work_mode == WorkMode.key_word_replace_mode:
-            self.handler_record = keyboard.add_word_listener(self.option_data_ref.substitute_keyword,
-                                                             self.key_word_replace_callback,
-                                                             triggers=self.option_data_ref.trigger_key,
-                                                             match_suffix=self.option_data_ref.ignore_prefix,
-                                                             timeout=self.option_data_ref.timeout)
-        else:
-            self.handler_record = keyboard.add_hotkey(self.option_data_ref.hot_key, self.hot_key_callback)
-
-        # change the floating widget status
-        self.main_window.switch_status(DisplayMode.normal_hook_installed)
-
-    def remove_listener(self):
-        """
-        remove existing listener
-        :return: None
-        """
-        # if already registered listener, remove it
-        if self.handler_record is not None:
-            if self.option_data_ref.work_mode == WorkMode.key_word_replace_mode:
-                keyboard.remove_word_listener(self.handler_record)
-            else:
-                keyboard.remove_hotkey(self.handler_record)
-            self.handler_record = None
-        self.main_window.switch_status(DisplayMode.normal_no_hook)
-        self.main_window.menu_action_unhook.setEnabled(False)
-        self.main_window.menu_action_quick_hook.setEnabled(True)
 
     def show(self):
         self.main_window.show()
@@ -164,8 +126,6 @@ class Img2url:
         :return:None
         """
         try:
-            self.remove_listener()
-
             # read settings from window
             self.option_control.read_settings()
 
@@ -174,6 +134,9 @@ class Img2url:
 
             # refresh the upload link in case of the library selection changed
             self.image_uploader.upload_link = self.image_uploader.get_upload_link()
+
+            if self.option_data_ref.original_work_mode != self.option_data_ref.work_mode:
+                self.reset_state()
         except Exception as ex:
             # notify user if anything wrong with the process
             OptionWindow.pop_message_box('Save Error', ex.__str__())
@@ -195,10 +158,10 @@ class Img2url:
                                                                                  'settings and restore initial '
                                                                                  'settings, confirm to continue?'):
             try:
-                self.remove_listener()
                 self.option_control.option_data.reset_all()
                 self.option_control.option_data.save_config_to_local()
                 self.option_control.fill_data()
+                self.reset_state()
             except Exception as ex:
                 OptionWindow.pop_message_box('Reset Error', ex.__str__())
 

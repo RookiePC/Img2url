@@ -45,6 +45,7 @@ class Options:
 
         # working mode
         self.work_mode: WorkMode = WorkMode.key_word_replace_mode
+        self.original_work_mode: WorkMode = self.work_mode
 
         # image settings
         self.type: str = ''
@@ -170,8 +171,7 @@ class Options:
 
     def reset_work_mode_settings(self):
         """
-        resets settings in work mode settings
-        work_mode : WorkMode.key_word_replace_mode
+        resets settings in work mode settings, does not change current workmode, but reset relevant settings
         substitute_keyword: @@
         trigger_key : space
         ignore_prefix: True
@@ -179,7 +179,7 @@ class Options:
         hot_key: f1
         :return:
         """
-        self.work_mode = WorkMode.key_word_replace_mode
+        # self.work_mode = WorkMode.key_word_replace_mode
         self.substitute_keyword = '@@'
         self.ignore_prefix = True
         self.trigger_key = 'space'
