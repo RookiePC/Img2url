@@ -184,14 +184,14 @@ class OptionControl:
 
         # catch all exception with request session,
         except requests.exceptions.RequestException:
-            label.setText('Failed during authentication procedure.')
-            label.setStyleSheet('QLabel#status_label {color: red}')
+            self.option_window.pop_message_box('Authenticate Error', 'Failed during authentication procedure with '
+                                                                     'exception.')
             return None
 
         # check the result code of request
         if res.status_code != 200:
-            label.setStyleSheet('QLabel#status_label {color: yellow}')
-            label.setText('Authentication failed. Username or Password Wrong')
+            self.option_window.pop_message_box('Authenticate Failed', 'Authentication failed. Username or Password '
+                                                                      'Wrong')
             return None
 
         return res.json()['token']

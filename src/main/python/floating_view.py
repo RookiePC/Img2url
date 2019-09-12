@@ -188,13 +188,36 @@ class FloatingWidget(QtWidgets.QWidget):
         # self.tray_icon.showMessage("test", "hello there!", QSystemTrayIcon.Information, 500)
         self.tray_icon.setToolTip('Still living')
 
-    @QtCore.pyqtSlot(str)
-    def pop_warning(self, raw_message: str):
-        title = raw_message.split('<sep>')[0]
-        message = raw_message.split('<sep>')[-1]
+    @QtCore.pyqtSlot(str, str)
+    def pop_warning(self, title: str, message: str):
+        """
+        for outer thread's signal call to display a warning window
+        :param message: message to display in message box
+        :param title: title for message box window
+        :return:
+        """
+        self.pop_window(title, message, QMessageBox.Warning)
 
+    @QtCore.pyqtSlot(str, str)
+    def pop_error(self, title: str, message: str):
+        """
+        for outer thread's sinal call to display a error window
+        :param message: message to display in message box
+        :param title: title for message box window
+        :return:
+        """
+        self.pop_window(title, message, QMessageBox.Critical)
+
+    def pop_window(self, title: str, message: str, icon: QMessageBox.Icon):
+        """
+        pop a message box with given parameters
+        :param title:
+        :param message:
+        :param icon:
+        :return:
+        """
         pop = QMessageBox()
-        pop.setIcon(QMessageBox.Warning)
+        pop.setIcon(icon)
         pop.setWindowTitle(title)
         pop.setText(message)
         pop.exec_()

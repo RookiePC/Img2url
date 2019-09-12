@@ -24,8 +24,6 @@ SOFTWARE.
 import pyperclip
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal, QObject
-from PyQt5.QtWidgets import QMessageBox
-
 from Image_uploader import ImageUploader
 from floating_view import FloatingWidget, DisplayMode
 from Option_control import OptionControl
@@ -36,8 +34,8 @@ import floating_view
 
 
 class Img2url(QObject):
-    warning_signal = pyqtSignal(str)
-    error_signal = pyqtSignal(str)
+    warning_signal = pyqtSignal(str, str)
+    error_signal = pyqtSignal(str, str)
 
     def __init__(self, app_: QtWidgets.QApplication):
         super().__init__()
@@ -58,7 +56,7 @@ class Img2url(QObject):
         self.main_window.menu_action_options.triggered.connect(self.option_control.show_option_window)
 
         self.warning_signal.connect(self.main_window.pop_warning)
-
+        self.error_signal.connect(self.main_window.pop_error)
 
         self.state = None
 
@@ -96,28 +94,6 @@ class Img2url(QObject):
 
         return self.image_uploader.form_image_url(shared_link, image_name)
 
-    def key_word_replace_callback(self):
-        """
-        for key word substitute mode, clears the substitute key word and write the formatted url
-        :return: None
-        """
-        try:
-            formatted_url = self.image_to_url_core()
-            replacement = '\b' * (len(self.option_data_ref.substitute_keyword) + 1) + formatted_url
-            keyboard.write(replacement)
-        except Exception as ex:
-            self.warning_signal.emit('Error' + '<sep>' + ex.__str__())
-
-    def hot_key_callback(self):
-        """
-        for hot key mode call back, only does the core job and copy it to clipboard
-        :return: None
-        """
-        try:
-            pyperclip.copy(self.image_to_url_core())
-        except Exception as ex:
-            self.warning_signal.emit('Error' + '<sep>' + ex.__str__())
-
     def show(self):
         self.main_window.show()
 
@@ -146,7 +122,7 @@ class Img2url(QObject):
                 self.reset_state()
         except Exception as ex:
             # notify user if anything wrong with the process
-            self.option_window_ref.pop_message_box('Save Error', ex.__str__())
+            self.error_signal.emit('Save Failed', ex.__str__())
             return
 
         # if nothing went wrong then close the option window
@@ -170,7 +146,7 @@ class Img2url(QObject):
                 self.option_control.fill_data()
                 self.reset_state()
             except Exception as ex:
-                OptionWindow.pop_message_box('Reset Error', ex.__str__())
+                self.error_signal.emit('Reset Failed', ex.__str__())
 
 
 class Img2urlState:
@@ -273,6 +249,18 @@ class KeywordHookState(HookState):
         self.context.context_menu_unhook_ref.triggered.disconnect()
         self.context.context_menu_unhook_ref.triggered.connect(self.quit)
 
+    def key_word_replace_callback(self):
+        """
+        for key word substitute mode, clears the substitute key word and write the formatted url
+        :return: None
+        """
+        try:
+            formatted_url = self.context.image_to_url_core()
+            replacement = '\b' * (len(self.context.option_data_ref.substitute_keyword) + 1) + formatted_url
+            keyboard.write(replacement)
+        except Exception as ex:
+            self.context.error_signal.emit('Key word replace failed', ex.__str__())
+
     def quit(self):
         # remove existing key word listener
         keyboard.remove_word_listener(self.hook_handler)
@@ -296,11 +284,19 @@ class HotKeyHookState(HookState):
         self.context.context_menu_unhook_ref.triggered.connect(self.quit)
 
     def hot_key_callback(self):
-        self.context.hot_key_callback()
-        self.context.main_window.switch_display(floating_view.DisplayMode.ready_to_paste)
-        # only adds the hot key if no previous hot key exists
-        if self.paste_handler is None:
-            self.paste_handler = keyboard.add_hotkey('ctrl+v', self.paste_callback)
+        """
+        for hot key mode call back, only does the core job and copy it to clipboard
+        :return: None
+        """
+        try:
+            pyperclip.copy(self.context.image_to_url_core())
+        except Exception as ex:
+            self.context.error_signal.emit('Core Process Failed', ex.__str__())
+        else:
+            self.context.main_window.switch_display(floating_view.DisplayMode.ready_to_paste)
+            # only adds the hot key if no previous hot key exists
+            if self.paste_handler is None:
+                self.paste_handler = keyboard.add_hotkey('ctrl+v', self.paste_callback)
 
     def paste_callback(self):
         self.context.main_window.switch_display(floating_view.DisplayMode.normal_hook_installed)
