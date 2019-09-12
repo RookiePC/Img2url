@@ -1,0 +1,9 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>display/favicon.ico</file>
+    <file>display/favicon_blue.ico</file>
+    <file>display/favicon_gray.ico</file>
+    <file>display/favicon_green.ico</file>
+    <file>display/favicon_orange.ico</file>
+</qresource>
+</RCC>

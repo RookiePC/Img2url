@@ -40,7 +40,7 @@ class FloatingWidget(QtWidgets.QWidget):
     def __init__(self, screen: QScreen):
         super().__init__()
 
-        self.pix = QPixmap(QImage('icons/favicon_gray.ico'))
+        self.pix = QPixmap(QImage('display/favicon_gray.ico'))
         self.pos = None
         self.label = QLabel(self)
         self.layout = QtWidgets.QVBoxLayout()
@@ -123,13 +123,13 @@ class FloatingWidget(QtWidgets.QWidget):
         :return:None
         """
         if mode == DisplayMode.normal_no_hook:
-            self.pix = QPixmap(QImage('icons/favicon_gray.ico'))
+            self.pix = QPixmap(QImage('display/favicon_gray.ico'))
         elif mode == DisplayMode.normal_hook_installed:
-            self.pix = QPixmap(QImage('icons/favicon_blue.ico'))
+            self.pix = QPixmap(QImage('display/favicon_blue.ico'))
         elif mode == DisplayMode.ready_to_paste:
-            self.pix = QPixmap(QImage('icons/favicon_green.ico'))
+            self.pix = QPixmap(QImage('display/favicon_green.ico'))
         else:
-            self.pix = QPixmap(QImage('icons/favicon_orange.ico'))
+            self.pix = QPixmap(QImage('display/favicon_orange.ico'))
 
         self.label.setPixmap(self.pix)
 
@@ -167,7 +167,7 @@ class FloatingWidget(QtWidgets.QWidget):
         initialises the tray icon, called after the original context menu initialed.
         :return: None
         """
-        self.tray_icon = QSystemTrayIcon(QIcon('icons/favicon.ico'))
+        self.tray_icon = QSystemTrayIcon(QIcon('display/favicon.ico'))
         self.tray_icon.show()
         self.tray_icon.setContextMenu(self.context_menu)
         # self.tray_icon.showMessage("test", "hello there!", QSystemTrayIcon.Information, 500)

@@ -23,10 +23,10 @@ SOFTWARE.
 """
 import sys
 
-from PySide2 import QtCore, QtWidgets
-from PySide2.QtCore import Qt
-from PySide2.QtGui import QIntValidator, QValidator, QCloseEvent
-from PySide2.QtWidgets import QMainWindow, QApplication, QMessageBox
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIntValidator
+from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox
 
 
 class OptionWindow(QMainWindow):
@@ -240,16 +240,25 @@ class OptionWindow(QMainWindow):
 
         self.image_size_edit.setMinimumSize(QtCore.QSize(240, 20))
         self.image_size_edit.setObjectName("image_size_edit")
-        self.image_size_edit.setValidator(ImgSizeValidator())
+        self.image_size_edit.setValidator(QIntValidator())
+        self.image_size_edit.setToolTip('Sets the image size, must be integer within 0 and 1024.')
         self.gridLayout_2.addWidget(self.image_size_edit, 2, 1, 1, 1)
 
         self.quick_pause_edit.setObjectName("quick_pause_edit")
+        # TODO : add support for quick pause
+        self.quick_pause_edit.setEnabled(False)
+        self.quick_pause_edit.setToolTip('Not supported yet.')
         self.gridLayout_2.addWidget(self.quick_pause_edit, 4, 1, 1, 1)
 
         self.quick_recover_edit.setObjectName("quick_recover_edit")
+        # TODO : add support for quick recover
+        self.quick_recover_edit.setEnabled(False)
+        self.quick_recover_edit.setToolTip('Not supported yet.')
         self.gridLayout_2.addWidget(self.quick_recover_edit, 5, 1, 1, 1)
 
         self.log_path_edit.setObjectName("log_path_edit")
+        self.log_path_edit.setToolTip('Not supported yet.')
+        self.log_path_edit.setEnabled(False)
         self.gridLayout_2.addWidget(self.log_path_edit, 6, 1, 1, 1)
 
         self.paste_format_edit.setObjectName("paste_format_edit")
@@ -373,13 +382,13 @@ class OptionWindow(QMainWindow):
         self.keyword_replace_mode_radiobutton.toggled.connect(self.on_keyword_radiobutton_toggled)
         self.hot_key_mode_radiobutton.toggled.connect(self.on_hot_key_radiobutton_toggled)
 
-    def on_keyword_radiobutton_toggled(self, enable):
-        if enable:
+    def on_keyword_radiobutton_toggled(self):
+        if self.keyword_replace_mode_radiobutton.isEnabled():
             self.set_hot_key_elements(False)
             self.set_key_word_replace_elements(True)
 
-    def on_hot_key_radiobutton_toggled(self, enable):
-        if enable:
+    def on_hot_key_radiobutton_toggled(self):
+        if self.hot_key_mode_radiobutton.isEnabled():
             self.set_hot_key_elements(True)
             self.set_key_word_replace_elements(False)
 
@@ -403,55 +412,27 @@ class OptionWindow(QMainWindow):
         self.hot_key_edit.setEnabled(enable)
         # self.multi_key_mode_checkbox.setEnabled(enable)
 
-    @staticmethod
-    def pop_message_box(title: str, message: str):
+    def pop_message_box(self, title: str, message: str):
         """
         pops a message box to notify something
         :param title: message box title to display
         :param message: message text to display inside the box
         :return: None
         """
-        message_box = QMessageBox()
-        message_box.setWindowTitle(title)
-        message_box.setText(message)
-        message_box.exec_()
+        QMessageBox.information(self, title, message, buttons=QMessageBox.Ok)
 
-    @staticmethod
-    def confirm_operation(title: str, message: str):
+    def confirm_operation(self, title: str, message: str):
         """
         pops message for user to confirm operation
         :param title: message box title to display
         :param message: message text content to display inside the box
         :return: True if confirms to continue
         """
-        message_box = QMessageBox()
+        message_box = QMessageBox(self)
         message_box.setWindowTitle(title)
         message_box.setText(message)
         message_box.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
         return message_box.exec_() == QMessageBox.Yes
-
-    def closeEvent(self, event: QCloseEvent):
-        event.ignore()
-        self.hide()
-
-
-class ImgSizeValidator(QValidator):
-    def validate(self, arg__1: str, arg__2: int) -> QValidator.State:
-        if len(arg__1) == 0:
-            return QValidator.Intermediate
-
-        if arg__1.isalpha():
-            return QValidator.Invalid
-
-        if arg__1.isdigit():
-            try:
-                value = int(arg__1)
-            except ValueError:
-                return QValidator.Invalid
-            if value <= 1024:
-                return QValidator.Acceptable
-
-        return QValidator.Invalid
 
 
 if __name__ == '__main__':

@@ -248,7 +248,5 @@ class OptionControl:
         self.list_library()
 
     def show_option_window(self):
+        self.fill_data()
         self.option_window.show()
-
-    def hide_option_window(self):
-        self.option_window.hide()
