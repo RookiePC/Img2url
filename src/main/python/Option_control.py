@@ -76,6 +76,8 @@ class OptionControl:
 
         _window.image_size_edit.setText(str(_data.size))
 
+        # clears the text edit before insert action to make sure no duplicated text added
+        _window.paste_format_edit.clear()
         _window.paste_format_edit.insertPlainText(_data.paste_format)
 
         _window.quick_pause_edit.setText(_data.quick_pause_hot_key)
@@ -250,3 +252,17 @@ class OptionControl:
     def show_option_window(self):
         self.fill_data()
         self.option_window.show()
+
+    def paste_format_check(self):
+        text = self.option_window.paste_format_edit.toPlainText()
+        if '{url}' not in text:
+            raise Exception('Paste format should contain at least one keyword "{url}"')
+
+    def substitute_keyword_check(self):
+        # if on macOS, check if the substitute keyword contains special keys
+        keyword_text: str = self.option_window.substitute_keyword_edit.text()
+        if len(keyword_text) == 0:
+            raise Exception('Substitute keyword cant be empty!')
+        if self.option_data.platform == 'darwin':
+            if not keyword_text.isalnum():
+                raise Exception('Special keys in keyword listening is not supported on MacOS yet.')

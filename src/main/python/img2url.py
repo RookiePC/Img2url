@@ -30,6 +30,7 @@ from Option_control import OptionControl
 from Options_data import WorkMode
 import keyboard
 import floating_view
+import pynput
 
 
 class Img2url(QObject):
@@ -45,6 +46,9 @@ class Img2url(QObject):
         self.option_control = OptionControl(self.image_uploader.option_data)
         self.option_control.fill_data()
         self.option_window_ref = self.option_control.option_window
+
+        if self.option_data_ref.platform == 'darwin':
+            self.keyboard_controller = pynput.keyboard.Controller()
 
         self.option_window_ref.save_button.clicked.connect(self.on_save_clicked)
         self.option_window_ref.reset_button.clicked.connect(self.on_reset_clicked)
@@ -108,6 +112,12 @@ class Img2url(QObject):
         :return:None
         """
         try:
+            # run a substitute keyword check
+            self.option_control.substitute_keyword_check()
+
+            # check the paste format, make sure there's one '{url}' in it at least.
+            self.option_control.paste_format_check()
+
             # read settings from window
             self.option_control.read_settings()
 
@@ -240,7 +250,7 @@ class KeywordHookState(HookState):
         """
         super().enter()
         self.hook_handler = keyboard.add_word_listener(self.context.option_data_ref.substitute_keyword,
-                                                       self.context.key_word_replace_callback,
+                                                       self.key_word_replace_callback,
                                                        triggers=self.context.option_data_ref.trigger_key,
                                                        match_suffix=self.context.option_data_ref.ignore_prefix,
                                                        timeout=self.context.option_data_ref.timeout)
@@ -255,7 +265,13 @@ class KeywordHookState(HookState):
         """
         try:
             formatted_url = self.context.image_to_url_core()
-            replacement = '\b' * (len(self.context.option_data_ref.substitute_keyword) + 1) + formatted_url
+            if self.context.option_data_ref.platform == 'darwin':
+                replacement = formatted_url
+                # uses pynput to produce backspace because keyboard cant do that for now.
+                for i in range(len(self.context.option_data_ref.substitute_keyword) + 1):
+                    self.context.keyboard_controller.press(pynput.keyboard.Key.backspace)
+            else:
+                replacement = '\b' * (len(self.context.option_data_ref.substitute_keyword) + 1) + formatted_url
             keyboard.write(replacement)
         except Exception as ex:
             self.context.error_signal.emit('Key word replace failed', ex.__str__())

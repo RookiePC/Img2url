@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import os
+import sys
 import enum
 import configparser
 
@@ -35,6 +36,7 @@ class WorkMode(enum.Enum):
 class Options:
     def __init__(self):
         super().__init__()
+        self.platform: str = sys.platform
         # config object initialization
         self.config_parser: configparser.ConfigParser = configparser.ConfigParser()
 

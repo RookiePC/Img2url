@@ -85,7 +85,7 @@ class FloatingWidget(QtWidgets.QWidget):
         self.resize(self.pix.size())
 
         # set the window to frameless and keep it always on top
-        self.setWindowFlags(Qt.WindowType.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         #self.setWindowFlags( Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
 
         # set the background invisible
@@ -94,9 +94,6 @@ class FloatingWidget(QtWidgets.QWidget):
         # sets this for MacOS (keep tool on top and hides the rocket icon)
         if sys.platform == 'darwin':
             self.setAttribute(Qt.WA_MacAlwaysShowToolWindow)
-            import AppKit
-            info = AppKit.NSBundle.mainBundle().infoDictionary()
-            info["LSBackgroundOnly"] = "1"
 
         # now sets the image to label
         self.label.setPixmap(self.pix)
@@ -284,10 +281,10 @@ class FloatingWidget(QtWidgets.QWidget):
             QCoreApplication.quit()
 
 
-# if __name__ == "__main__":
-#     app = QtWidgets.QApplication([])
-#
-#     widget = FloatingWidget(app.primaryScreen())
-#     widget.show()
-#
-#     sys.exit(app.exec_())
+if __name__ == "__main__":
+     app = QtWidgets.QApplication([])
+
+     widget = FloatingWidget(app.primaryScreen())
+     widget.show()
+
+     sys.exit(app.exec_())
