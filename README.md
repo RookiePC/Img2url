@@ -32,8 +32,10 @@ When triggerd, this little application grab the image in clipboard, upload it to
 
 # Known limitations
 * Grab image from clipboard only supports Windows/MacOS (for now)
-* Has to authenticate the application on MacOS or won't be able to listen to keyboard event.
+* Has to authenticate the application on MacOS or won't be able to listen to keyboard event.(Run as administrator)
+* Specials keys like @# or symbols in key word is not supported for now on MacOS.
 
 # Special Thanks
 - UI writes with [PyQt5](https://pypi.org/project/PyQt5/)
 - hook key board events writing with Python module [keyboard](https://github.com/boppreh/keyboard)
+- key events listen and keyboard control module [pynput](https://github.com/moses-palmer/pynput)
