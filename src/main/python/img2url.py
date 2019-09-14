@@ -27,7 +27,6 @@ from PyQt5.QtCore import pyqtSignal, QObject
 from Image_uploader import ImageUploader
 from floating_view import FloatingWidget, DisplayMode
 from Option_control import OptionControl
-from OptionWindow import OptionWindow
 from Options_data import WorkMode
 import keyboard
 import floating_view
@@ -323,3 +322,12 @@ class ErrorState(Img2urlState):
         self.context.main_window.switch_display(DisplayMode.cant_work_normally)
         self.context.main_window.show_tray_icon_message("Fatal error", "Img2url had run into an fatal error, quiting.")
         self.context.main_window.context_menu_quit_clicked()
+
+
+if __name__ == '__main__':
+    from PyQt5.QtWidgets import QApplication
+    import sys
+    app = QApplication([])
+    window = Img2url(app)
+    window.show()
+    sys.exit(app.exec_())
