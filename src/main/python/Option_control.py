@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from PyQt5 import QtWidgets
-
+from PyQt5.QtWidgets import QFileDialog
 from OptionWindow import OptionWindow
 from Options_data import Options, WorkMode
 import requests
@@ -36,6 +36,7 @@ class OptionControl:
         self.option_data = option_ref
         self.option_window.auth_check_button.clicked.connect(self.on_authenticate_check_clicked)
         self.option_window.on_or_offline_switch_button.clicked.connect(self.on_switch_mode_clicked)
+        self.option_window.browse_button.clicked.connect(self.on_browse_button_clicked)
         self.supported_img_format = [
             'PNG',
             'JPG',
@@ -54,7 +55,6 @@ class OptionControl:
         _window.library_comboBox.setCurrentText(_data.upload_repo_id)
         _window.domain_edit.setText(_data.domain)
 
-        # if has the auth token, fill it in the edit and change label, disable the pwd edit
         # shows the library label and combo box
         if _data.auth_token != '':
             _window.status_label.setText('Auth Token:' + _data.auth_token)
@@ -286,6 +286,16 @@ class OptionControl:
             if not keyword_text.isalnum():
                 raise Exception('Special keys in keyword listening is not supported on MacOS yet.')
 
+    def on_browse_button_clicked(self):
+        """
+        fills the save directory line edit with directory dialog
+        :return: None
+        """
+        save_path: str = str(QFileDialog.getExistingDirectory(self.option_window, "Select Directory To Store Image"))
+        if save_path is not None and len(save_path) != 0:
+            self.option_window.save_directory_edit.setText(save_path)
+            self.option_data.image_save_path = save_path
+
     def on_switch_mode_clicked(self):
         """
         switch the online or offline mode
@@ -301,22 +311,31 @@ class OptionControl:
         if auth_tab.isEnabled():
             # then we switch to offline work mode
             auth_tab.setEnabled(False)
-            # add the tab
+
             tab.addTab(local_mode_tab, "Local mode")
+
             # set the active tab to the newly added one
             tab.setCurrentIndex(tab.indexOf(local_mode_tab))
 
+            # sets the directory path for image storing
             self.option_window.save_directory_edit.setText(self.option_data.image_save_path)
 
+            # change the flag
+            self.option_data.work_offline = True
             switch_button.setText('Online mode')
+
         # else we are currently offline mode
         else:
             # do the online switching work
             # enables the auth tab
             auth_tab.setEnabled(True)
+
             # set the active tab to the authorization tab
             tab.setCurrentIndex(tab.indexOf(auth_tab))
+
             # remove the local mode tab
             tab.removeTab(tab.indexOf(local_mode_tab))
 
+            # change the flag
+            self.option_data.work_offline = False
             switch_button.setText('Offline mode')

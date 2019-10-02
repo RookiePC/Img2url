@@ -24,9 +24,9 @@ SOFTWARE.
 import sys
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import Qt, pyqtSlot
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIntValidator
-from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox
 
 
 class OptionWindow(QMainWindow):
@@ -64,7 +64,6 @@ class OptionWindow(QMainWindow):
         self.workmode_tab = QtWidgets.QWidget()
         self.gridLayout_4 = QtWidgets.QGridLayout(self.workmode_tab)
         self.trigger_key_label = QtWidgets.QLabel(self.workmode_tab)
-        # self.label_6 = QtWidgets.QLabel(self.workmode_tab)
         self.substitute_keyword_label = QtWidgets.QLabel(self.workmode_tab)
         self.timeout_label = QtWidgets.QLabel(self.workmode_tab)
         self.ignore_prefix_label = QtWidgets.QLabel(self.workmode_tab)
@@ -259,9 +258,6 @@ class OptionWindow(QMainWindow):
         self.hot_key_edit.setObjectName("hot_key_edit")
         self.gridLayout_4.addWidget(self.hot_key_edit, 7, 1, 1, 1)
 
-        # self.multi_key_mode_checkbox.setObjectName("multi_key_mode_checkbox")
-        # self.gridLayout_4.addWidget(self.multi_key_mode_checkbox, 8, 1, 1, 1)
-
         self.hot_key_mode_radiobutton.setObjectName("radioButton_2")
         self.gridLayout_4.addWidget(self.hot_key_mode_radiobutton, 6, 0, 1, 1)
 
@@ -288,8 +284,6 @@ class OptionWindow(QMainWindow):
         self.ignore_prefix_checkbox.setObjectName("ignore_prefix_checkbox")
         self.gridLayout_4.addWidget(self.ignore_prefix_checkbox, 4, 1, 1, 1)
 
-        # self.gridLayout_4.addWidget(self.label_6, 8, 0, 1, 1)
-
         self.gridLayout_4.addWidget(self.substitute_keyword_label, 1, 0, 1, 1)
 
         self.gridLayout_4.addWidget(self.timeout_label, 3, 0, 1, 1)
@@ -311,7 +305,6 @@ class OptionWindow(QMainWindow):
         self.gridLayout_5.addWidget(self.save_directory_edit, 0, 1, 1, 1)
         self.browse_button.setObjectName('browse_button')
         self.gridLayout_5.addWidget(self.browse_button, 0, 2, 1, 1)
-
 
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_2.setSpacing(0)
@@ -394,16 +387,6 @@ class OptionWindow(QMainWindow):
         if self.hot_key_mode_radiobutton.isEnabled():
             self.set_hot_key_elements(True)
             self.set_key_word_replace_elements(False)
-
-    @pyqtSlot()
-    def on_browse_button_clicked(self):
-        """
-        fills the save directory line edit with directory dialog
-        :return: None
-        """
-        save_path = str(QFileDialog.getExistingDirectory(self, "Select Directory To Store Image"))
-        if save_path is not None:
-            self.save_directory_edit.setText(save_path)
 
     def set_key_word_replace_elements(self, enable: bool):
         """

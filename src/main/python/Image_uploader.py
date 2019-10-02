@@ -21,6 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import os
 import requests
 import io
 import datetime
@@ -60,6 +61,14 @@ class ImageUploader:
         :return: string with format yy-mm-dd-HH-MM-SS
         """
         return datetime.datetime.now().strftime('%y-%m-%d-%H-%M-%S')
+
+    @staticmethod
+    def get_date():
+        """
+        returns a local date
+        :return: string, formatted time in yy-mm-dd
+        """
+        return datetime.datetime.now().strftime('%y-%m-%d')
 
     def get_clipboard_img(self):
         """
@@ -131,3 +140,58 @@ class ImageUploader:
         """
         img_url = share_link.replace('/f/', '/thumbnail/') + str(self.option_data.size) + '/' + image_name
         return self.option_data.paste_format.replace('{url}', img_url)
+
+    def save_image_to_local(self) -> str:
+        """
+        stores the image in clipboard into local file system.
+        returns the image file's full path or raises exception if anything wrong with the process
+        :return: string, the full path of image saved.
+        """
+        save_dir = self.option_data.image_save_path + os.path.sep + self.get_date()
+
+        # if the path does not exists then we create one manually
+        if not os.path.exists(save_dir):
+            os.mkdir(save_dir)
+
+        try:
+            # grab from clipboard
+            img = ImageGrab.grabclipboard()
+
+            # check if the grab succeed
+            if img is None:
+                raise Exception('No image found in clipboard')
+
+            # forms the full save path
+            image_path = save_dir + os.path.sep + self.get_timestamp() + '.' + self.option_data.type
+
+            # save the content to local file
+            with open(image_path, 'wb') as image_file:
+                with io.BytesIO() as OUTPUT:
+                    img.save(OUTPUT, format=self.option_data.type)
+                    image_file.write(OUTPUT.getvalue())
+
+            return image_path
+        except AttributeError as ex:
+            raise Exception('Failed while reading data from img with :' + ex.__str__())
+
+    def form_local_image_url(self, image_path: str) -> str:
+        image_path = image_path.replace('\\', '/')
+        return self.option_data.paste_format.replace('{url}', image_path)
+
+    def image_to_url_core(self) -> str:
+        """
+        perform a series of process to grab image from clipboard, upload, get share link, parse into formatted url
+        raises Exception inside core function call
+        :return: formatted url of image in clipboard
+        """
+        if not self.option_data.work_offline:
+            image_name = self.upload_image()
+
+            shared_link = self.get_image_share_link(image_name)
+
+            return self.form_image_url(shared_link, image_name)
+        else:
+
+            image_path = self.save_image_to_local()
+
+            return self.form_local_image_url(image_path)

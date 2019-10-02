@@ -69,6 +69,7 @@ class Options:
 
         # directory to save image, CAUTION: wont be saved in the config file
         self.image_save_path: str = ''
+        self.work_offline: bool = False
 
         # consts that wouldn't change
         self.config_file_name: str = 'img2url.ini'
@@ -116,6 +117,7 @@ class Options:
         # resets the image save path here since we don't actually stores it in config file
         # and it does not belong to any section we have
         self.image_save_path = self.get_default_path()
+        self.work_offline = False
 
     def reset_authorization_settings(self):
         """

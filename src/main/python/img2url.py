@@ -82,18 +82,6 @@ class Img2url(QObject):
 
         self.state.enter()
 
-    def image_to_url_core(self) -> str:
-        """
-        perform a series of process to grab image from clipboard, upload, get share link, parse into formatted url
-        raises Exception inside core function call
-        :return: formatted url of image in clipboard
-        """
-        image_name = self.image_uploader.upload_image()
-
-        shared_link = self.image_uploader.get_image_share_link(image_name)
-
-        return self.image_uploader.form_image_url(shared_link, image_name)
-
     def show(self):
         self.main_window.show()
 
@@ -261,7 +249,7 @@ class KeywordHookState(HookState):
         :return: None
         """
         try:
-            formatted_url = self.context.image_to_url_core()
+            formatted_url = self.context.image_uploader.image_to_url_core()
             if self.context.option_data_ref.platform == 'darwin':
                 replacement = formatted_url
                 # uses pynput to produce backspace because keyboard cant do that for now.
@@ -301,7 +289,7 @@ class HotKeyHookState(HookState):
         :return: None
         """
         try:
-            pyperclip.copy(self.context.image_to_url_core())
+            pyperclip.copy(self.context.image_uploader.image_to_url_core())
         except Exception as ex:
             self.context.error_signal.emit('Core Process Failed', ex.__str__())
         else:
