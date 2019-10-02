@@ -104,7 +104,7 @@ class Options:
         does not trigger a config saving action after all the reset process
         :return:None
         """
-        self.reset_authorization_part()
+        self.reset_authorization_settings()
         self.save_authorization_settings()
 
         self.reset_general_settings()
@@ -113,7 +113,11 @@ class Options:
         self.reset_work_mode_settings()
         self.save_work_mode_settings()
 
-    def reset_authorization_part(self):
+        # resets the image save path here since we don't actually stores it in config file
+        # and it does not belong to any section we have
+        self.image_save_path = self.get_default_path()
+
+    def reset_authorization_settings(self):
         """
         resets the web-api related part, set domain, auth_token, upload_repo_id to None.
         does not trigger a config saving action

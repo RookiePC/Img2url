@@ -88,9 +88,6 @@ class Img2url(QObject):
         raises Exception inside core function call
         :return: formatted url of image in clipboard
         """
-        if self.image_uploader.upload_link is None:
-            self.image_uploader.upload_link = self.image_uploader.get_upload_link()
-
         image_name = self.image_uploader.upload_image()
 
         shared_link = self.image_uploader.get_image_share_link(image_name)
@@ -125,7 +122,7 @@ class Img2url(QObject):
             self.option_control.option_data.save_config_to_local()
 
             # refresh the upload link in case of the library selection changed
-            self.image_uploader.upload_link = self.image_uploader.get_upload_link()
+            self.image_uploader.get_upload_link()
 
             if self.option_data_ref.original_work_mode != self.option_data_ref.work_mode:
                 self.reset_state()

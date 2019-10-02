@@ -23,7 +23,7 @@ SOFTWARE.
 """
 import requests
 import io
-import time
+import datetime
 from PIL import ImageGrab
 from Options_data import Options
 
@@ -32,6 +32,7 @@ class ImageUploader:
     def __init__(self):
         self.option_data: Options = Options()
         self.upload_link = None
+        self.last_get_up_link_time = None
 
     def get_upload_link(self):
         """
@@ -45,7 +46,12 @@ class ImageUploader:
             )
         except requests.exceptions.RequestException as ex:
             raise Exception('Failed during process with exception:' + ex.strerror)
-        return resp.json()
+
+        # stores the upload link get time for later use
+        self.last_get_up_link_time = datetime.datetime.now()
+
+        # fills the upload_link
+        self.upload_link = resp.json()
 
     @staticmethod
     def get_timestamp():
@@ -53,7 +59,7 @@ class ImageUploader:
         returns a local timestamp string
         :return: string with format yy-mm-dd-HH-MM-SS
         """
-        return time.strftime('%y-%m-%d-%H-%M-%S', time.localtime())
+        return datetime.datetime.now().strftime('%y-%m-%d-%H-%M-%S')
 
     def get_clipboard_img(self):
         """
@@ -80,6 +86,9 @@ class ImageUploader:
         upload image object to seafile service.
         :return: image name if succeed else raise Exception
         """
+        if self.upload_link is None or (datetime.datetime.now() - self.last_get_up_link_time).seconds > 1800:
+            self.get_upload_link()
+
         image_name = self.get_timestamp() + '.' + self.option_data.type
         image_content = self.get_clipboard_img()
 

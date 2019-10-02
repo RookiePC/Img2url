@@ -306,6 +306,8 @@ class OptionControl:
             # set the active tab to the newly added one
             tab.setCurrentIndex(tab.indexOf(local_mode_tab))
 
+            self.option_window.save_directory_edit.setText(self.option_data.image_save_path)
+
             switch_button.setText('Online mode')
         # else we are currently offline mode
         else:
