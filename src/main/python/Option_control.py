@@ -21,6 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QFileDialog
 from OptionWindow import OptionWindow
 from Options_data import Options, WorkMode
 import requests
@@ -33,6 +35,8 @@ class OptionControl:
         self.option_window = OptionWindow()
         self.option_data = option_ref
         self.option_window.auth_check_button.clicked.connect(self.on_authenticate_check_clicked)
+        self.option_window.on_or_offline_switch_button.clicked.connect(self.on_switch_mode_clicked)
+        self.option_window.browse_button.clicked.connect(self.on_browse_button_clicked)
         self.supported_img_format = [
             'PNG',
             'JPG',
@@ -51,7 +55,6 @@ class OptionControl:
         _window.library_comboBox.setCurrentText(_data.upload_repo_id)
         _window.domain_edit.setText(_data.domain)
 
-        # if has the auth token, fill it in the edit and change label, disable the pwd edit
         # shows the library label and combo box
         if _data.auth_token != '':
             _window.status_label.setText('Auth Token:' + _data.auth_token)
@@ -80,10 +83,6 @@ class OptionControl:
         _window.paste_format_edit.clear()
         _window.paste_format_edit.insertPlainText(_data.paste_format)
 
-        _window.quick_pause_edit.setText(_data.quick_pause_hot_key)
-
-        _window.quick_recover_edit.setText(_data.quick_recover_hot_key)
-
         _window.log_path_edit.setText(_data.log_save_path)
 
         # sets the radio button's status with the option data
@@ -100,7 +99,8 @@ class OptionControl:
         _window.ignore_prefix_checkbox.setChecked(_data.ignore_prefix)
 
         _window.hot_key_edit.setText(_data.hot_key)
-        # _window.multi_key_mode_checkbox.setEnabled(_data.multi_key_mode)
+
+        _window.save_directory_edit.setText(_data.image_save_path)
 
     def read_settings(self):
         """
@@ -123,8 +123,6 @@ class OptionControl:
         _data.type = _window.img_type_combobox.currentText()
         _data.size = int(_window.image_size_edit.text())
         _data.paste_format = _window.paste_format_edit.toPlainText()
-        _data.quick_pause_hot_key = _window.quick_pause_edit.text()
-        _data.quick_recover_hot_key = _window.quick_recover_edit.text()
         _data.log_save_path = _window.log_path_edit.text()
 
         _data.original_work_mode = _data.work_mode
@@ -139,7 +137,8 @@ class OptionControl:
         _data.ignore_prefix = _window.ignore_prefix_checkbox.isChecked()
 
         _data.hot_key = _window.hot_key_edit.text()
-        # _data.multi_key_mode = _window.multi_key_mode_checkbox.isChecked()
+
+        _data.image_save_path = _window.save_directory_edit.text()
 
     def domain_check(self) -> bool:
         """
@@ -174,8 +173,6 @@ class OptionControl:
         try to get the auth token with given username and password
         :return: Token if retrieved successfully, else None
         """
-        label = self.option_window.status_label
-
         # try to authenticate with given username and password
         try:
             res = requests.post(self.option_window.domain_edit.text() + '/api2/auth-token/',
@@ -228,13 +225,26 @@ class OptionControl:
         for item in res.json():
             repo_id = item['id']
             if repo_id not in repo_id_set:
-                lib_combo_box.addItem(item['name'] + ' ^-^ ' + repo_id)
+                combox_item = item['name'] + ' ^-^ ' + repo_id
+
+                # compares the id with that in log file( user's selection)
+                if self.option_data.upload_repo_id == repo_id:
+                    lib_combo_box.setCurrentText(combox_item)
+
+                lib_combo_box.addItem(combox_item)
                 repo_id_set.append(repo_id)
 
     def on_selection_changed(self, text: str):
         self.option_data.upload_repo_id = text.split(' ^-^ ')[-1]
 
     def on_authenticate_check_clicked(self):
+        """
+        Does the authenticate process and shows the hidden elements inside the window, including :
+        status label : used to surface auth token.
+        library label : to tell what the combo box is next to it
+        combobox: list all library in authenticated account.
+        :return: None, Exception would be thrown if anything wrong inside any steps.
+        """
         if not self.domain_check():
             return
 
@@ -254,11 +264,20 @@ class OptionControl:
         self.option_window.show()
 
     def paste_format_check(self):
+        """
+        Checks if the paste format data is legal, the rule for now is that it must contain at least one '{url}'
+        for later replacement when triggered.
+        :return: None, if anything wrong, Exception would be thrown to surface the issue.
+        """
         text = self.option_window.paste_format_edit.toPlainText()
         if '{url}' not in text:
             raise Exception('Paste format should contain at least one keyword "{url}"')
 
     def substitute_keyword_check(self):
+        """
+        checks the content in substitute keyword line edit, to ensure the key is supported on relate platform.
+        :return: None
+        """
         # if on macOS, check if the substitute keyword contains special keys
         keyword_text: str = self.option_window.substitute_keyword_edit.text()
         if len(keyword_text) == 0:
@@ -266,3 +285,57 @@ class OptionControl:
         if self.option_data.platform == 'darwin':
             if not keyword_text.isalnum():
                 raise Exception('Special keys in keyword listening is not supported on MacOS yet.')
+
+    def on_browse_button_clicked(self):
+        """
+        fills the save directory line edit with directory dialog
+        :return: None
+        """
+        save_path: str = str(QFileDialog.getExistingDirectory(self.option_window, "Select Directory To Store Image"))
+        if save_path is not None and len(save_path) != 0:
+            self.option_window.save_directory_edit.setText(save_path)
+            self.option_data.image_save_path = save_path
+
+    def on_switch_mode_clicked(self):
+        """
+        switch the online or offline mode
+        :return:
+        """
+        auth_tab: QtWidgets.QWidget = self.option_window.authorization_tab
+        local_mode_tab: QtWidgets.QWidget = self.option_window.local_mode_tab
+        tab: QtWidgets.QTabWidget = self.option_window.tabWidget
+        switch_button: QtWidgets.QPushButton = self.option_window.on_or_offline_switch_button
+
+        # check the status of auth_tab to determine the current mode
+        # authorization tab enabled means we are currently on online mode
+        if auth_tab.isEnabled():
+            # then we switch to offline work mode
+            auth_tab.setEnabled(False)
+
+            tab.addTab(local_mode_tab, "Local mode")
+
+            # set the active tab to the newly added one
+            tab.setCurrentIndex(tab.indexOf(local_mode_tab))
+
+            # sets the directory path for image storing
+            self.option_window.save_directory_edit.setText(self.option_data.image_save_path)
+
+            # change the flag
+            self.option_data.work_offline = True
+            switch_button.setText('Online mode')
+
+        # else we are currently offline mode
+        else:
+            # do the online switching work
+            # enables the auth tab
+            auth_tab.setEnabled(True)
+
+            # set the active tab to the authorization tab
+            tab.setCurrentIndex(tab.indexOf(auth_tab))
+
+            # remove the local mode tab
+            tab.removeTab(tab.indexOf(local_mode_tab))
+
+            # change the flag
+            self.option_data.work_offline = False
+            switch_button.setText('Offline mode')

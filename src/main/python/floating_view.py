@@ -27,7 +27,7 @@ import enum
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import Qt, QCoreApplication, QPoint
 from PyQt5.QtGui import QPixmap, QImage, QCursor, QScreen, QIcon
-from PyQt5.QtWidgets import QLabel, QGraphicsDropShadowEffect, QMenu, QSystemTrayIcon, QMessageBox
+from PyQt5.QtWidgets import QLabel, QGraphicsDropShadowEffect, QMenu, QSystemTrayIcon, QMessageBox, QDesktopWidget
 
 import resource
 
@@ -86,7 +86,7 @@ class FloatingWidget(QtWidgets.QWidget):
 
         # set the window to frameless and keep it always on top
         self.setWindowFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-        #self.setWindowFlags( Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        # self.setWindowFlags( Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
 
         # set the background invisible
         self.setAttribute(Qt.WA_TranslucentBackground)
@@ -213,9 +213,10 @@ class FloatingWidget(QtWidgets.QWidget):
         :param icon:
         :return:
         """
-        pop = QMessageBox()
+        pop = QMessageBox(self)
         pop.setIcon(icon)
         pop.setWindowTitle(title)
+        pop.move(QDesktopWidget().availableGeometry().center())
         pop.setText(message)
         pop.exec_()
 

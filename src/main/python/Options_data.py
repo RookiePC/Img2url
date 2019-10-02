@@ -30,7 +30,6 @@ import configparser
 class WorkMode(enum.Enum):
     key_word_replace_mode = 1
     hot_key_mode = 2
-    # TODO: local mode
 
 
 class Options:
@@ -64,14 +63,13 @@ class Options:
 
         # hot-key mode
         self.hot_key: str = ''
-        # self.multi_key_mode: bool = False
-
-        # quick_pause
-        self.quick_pause_hot_key: str = ''
-        self.quick_recover_hot_key: str = ''
 
         # file save
         self.log_save_path: str = ''
+
+        # directory to save image, CAUTION: wont be saved in the config file
+        self.image_save_path: str = ''
+        self.work_offline: bool = False
 
         # consts that wouldn't change
         self.config_file_name: str = 'img2url.ini'
@@ -84,11 +82,11 @@ class Options:
         # inits the config object first
         self.config_init()
 
-        # after all member variable declared, inits them with reset method(this would inits the config)
-        # do this before read from local to avoid unexpected error shuts down the application
+        # after all member variable declared, inits them with reset method(this would inits the config object not the
+        # file) do this before read from local to avoid unexpected error shuts down the application
         self.reset_all()
 
-        # if read from local failed which means the config does not exists or not complete, them we save one manually
+        # if read from local failed which means the config does not exists or not complete, then we save one manually
         if not self.read_local_config_file():
             self.save_config_to_local()
 
@@ -107,7 +105,7 @@ class Options:
         does not trigger a config saving action after all the reset process
         :return:None
         """
-        self.reset_authorization_part()
+        self.reset_authorization_settings()
         self.save_authorization_settings()
 
         self.reset_general_settings()
@@ -116,7 +114,12 @@ class Options:
         self.reset_work_mode_settings()
         self.save_work_mode_settings()
 
-    def reset_authorization_part(self):
+        # resets the image save path here since we don't actually stores it in config file
+        # and it does not belong to any section we have
+        self.image_save_path = self.get_default_path()
+        self.work_offline = False
+
+    def reset_authorization_settings(self):
         """
         resets the web-api related part, set domain, auth_token, upload_repo_id to None.
         does not trigger a config saving action
@@ -152,8 +155,6 @@ class Options:
         self.type: str = 'PNG'
         self.size: int = 1024
         self.paste_format: str = r'![]({url})'
-        self.quick_pause_hot_key = 'ctrl+alt+p'
-        self.quick_recover_hot_key = 'ctrl+alt+r'
         self.log_save_path = self.get_default_path()
 
     def save_general_settings(self):
@@ -166,8 +167,6 @@ class Options:
             'type': self.type,
             'size': self.size,
             'paste_format': self.paste_format.replace('\n', '<&br />'),
-            'quick_pause': self.quick_pause_hot_key,
-            'quick_recover': self.quick_recover_hot_key,
             'log_path': self.log_save_path
         }
 
@@ -224,18 +223,26 @@ class Options:
         """
         local_config_file = self.get_default_path() + os.sep + self.config_file_name
 
+        # path check
         if not os.path.exists(local_config_file):
             return False
 
-        self.config_parser.read(local_config_file)
+        try:
+            # read into memory
+            self.config_parser.read(local_config_file)
 
-        for name in self.section_names:
-            if name not in self.config_parser:
-                return False
+            # all section check
+            for name in self.section_names:
+                if name not in self.config_parser:
+                    return False
 
-        self.read_authorization_settings(self.config_parser['authorization'])
-        self.read_general_settings(self.config_parser['general'])
-        self.read_work_mode_settings(self.config_parser['work mode'])
+            # read in settings
+            self.read_authorization_settings(self.config_parser['authorization'])
+            self.read_general_settings(self.config_parser['general'])
+            self.read_work_mode_settings(self.config_parser['work mode'])
+        except configparser.Error:
+            # returns false if anything wrong within the process
+            return False
 
         return True
 
@@ -259,8 +266,6 @@ class Options:
         self.type = general_section.get('type', self.type)
         self.size = general_section.getint('size', self.size)
         self.paste_format = general_section.get('paste_format', self.paste_format).replace('<&br />', '\n')
-        self.quick_pause_hot_key = general_section.get('quick_pause', self.quick_pause_hot_key)
-        self.quick_recover_hot_key = general_section.get('quick_recover', self.quick_recover_hot_key)
         self.log_save_path = general_section.get('log_path', self.log_save_path)
 
     def read_work_mode_settings(self, work_mode_section: configparser.SectionProxy):
@@ -282,7 +287,6 @@ class Options:
         self.timeout = work_mode_section.getint('timeout', self.timeout)
         self.trigger_key = work_mode_section.get('trigger_key', self.trigger_key)
         self.hot_key = work_mode_section.get('hot_key', self.hot_key)
-        # self.multi_key_mode = work_mode_section.getboolean('multi_key_mode', self.multi_key_mode)
 
     @staticmethod
     def get_default_path() -> str:

@@ -57,22 +57,26 @@ class OptionWindow(QMainWindow):
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
         self.gridLayout_3 = QtWidgets.QGridLayout(self.scrollAreaWidgetContents)
         self.gridLayout_2 = QtWidgets.QGridLayout()
-        self.quick_pause_label = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.log_path_label = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.image_size_label = QtWidgets.QLabel(self.scrollAreaWidgetContents)
-        self.quick_recover_label = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.paste_format_label = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.image_format_label = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.workmode_tab = QtWidgets.QWidget()
         self.gridLayout_4 = QtWidgets.QGridLayout(self.workmode_tab)
-        self.label_2 = QtWidgets.QLabel(self.workmode_tab)
-        # self.label_6 = QtWidgets.QLabel(self.workmode_tab)
-        self.label = QtWidgets.QLabel(self.workmode_tab)
-        self.label_4 = QtWidgets.QLabel(self.workmode_tab)
-        self.label_3 = QtWidgets.QLabel(self.workmode_tab)
+        self.trigger_key_label = QtWidgets.QLabel(self.workmode_tab)
+        self.substitute_keyword_label = QtWidgets.QLabel(self.workmode_tab)
+        self.timeout_label = QtWidgets.QLabel(self.workmode_tab)
+        self.ignore_prefix_label = QtWidgets.QLabel(self.workmode_tab)
         self.line = QtWidgets.QFrame(self.workmode_tab)
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
-        self.label_5 = QtWidgets.QLabel(self.workmode_tab)
+        self.hot_key_label = QtWidgets.QLabel(self.workmode_tab)
+
+        # local mode part
+        self.local_mode_tab = QtWidgets.QWidget()
+        self.gridLayout_5 = QtWidgets.QGridLayout(self.local_mode_tab)
+        self.directory_label = QtWidgets.QLabel(self.local_mode_tab)
+        self.save_directory_edit = QtWidgets.QLineEdit(self.local_mode_tab)
+        self.browse_button = QtWidgets.QPushButton(self.local_mode_tab)
 
         # authorization part
         self.usr_edit = QtWidgets.QLineEdit(self.verticalLayoutWidget_2)
@@ -84,8 +88,6 @@ class OptionWindow(QMainWindow):
         # general settings part
         self.img_type_combobox = QtWidgets.QComboBox(self.scrollAreaWidgetContents)
         self.image_size_edit = QtWidgets.QLineEdit(self.scrollAreaWidgetContents)
-        self.quick_pause_edit = QtWidgets.QLineEdit(self.scrollAreaWidgetContents)
-        self.quick_recover_edit = QtWidgets.QLineEdit(self.scrollAreaWidgetContents)
         self.log_path_edit = QtWidgets.QLineEdit(self.scrollAreaWidgetContents)
         self.paste_format_edit = QtWidgets.QTextEdit(self.scrollAreaWidgetContents)
 
@@ -100,6 +102,7 @@ class OptionWindow(QMainWindow):
         self.ignore_prefix_checkbox = QtWidgets.QCheckBox(self.workmode_tab)
 
         self.reset_button = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        self.on_or_offline_switch_button = QtWidgets.QPushButton(self.verticalLayoutWidget)
         self.save_button = QtWidgets.QPushButton(self.verticalLayoutWidget)
 
         self.set_up_simple_interaction()
@@ -200,7 +203,7 @@ class OptionWindow(QMainWindow):
 
         self.general_tab.setObjectName("general_tab")
 
-        self.scrollArea.setGeometry(QtCore.QRect(0, 0, 381, 221))
+        self.scrollArea.setGeometry(QtCore.QRect(-4, -2, 391, 231))
         self.scrollArea.setWidgetResizable(True)
 
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 371, 261))
@@ -209,10 +212,6 @@ class OptionWindow(QMainWindow):
         self.gridLayout_2.setHorizontalSpacing(8)
         self.gridLayout_2.setVerticalSpacing(13)
 
-        self.quick_pause_label.setMinimumSize(QtCore.QSize(85, 20))
-        self.quick_pause_label.setMaximumSize(QtCore.QSize(85, 20))
-        self.gridLayout_2.addWidget(self.quick_pause_label, 4, 0, 1, 1, QtCore.Qt.AlignVCenter)
-
         self.log_path_label.setMinimumSize(QtCore.QSize(85, 20))
         self.log_path_label.setMaximumSize(QtCore.QSize(85, 20))
         self.gridLayout_2.addWidget(self.log_path_label, 6, 0, 1, 1)
@@ -220,10 +219,6 @@ class OptionWindow(QMainWindow):
         self.image_size_label.setMinimumSize(QtCore.QSize(85, 20))
         self.image_size_label.setMaximumSize(QtCore.QSize(85, 20))
         self.gridLayout_2.addWidget(self.image_size_label, 2, 0, 1, 1, QtCore.Qt.AlignVCenter)
-
-        self.quick_recover_label.setMinimumSize(QtCore.QSize(85, 20))
-        self.quick_recover_label.setMaximumSize(QtCore.QSize(85, 20))
-        self.gridLayout_2.addWidget(self.quick_recover_label, 5, 0, 1, 1)
 
         self.paste_format_label.setMinimumSize(QtCore.QSize(85, 20))
         self.paste_format_label.setMaximumSize(QtCore.QSize(85, 20))
@@ -244,18 +239,6 @@ class OptionWindow(QMainWindow):
         self.image_size_edit.setToolTip('Sets the image size, must be integer within 0 and 1024.')
         self.gridLayout_2.addWidget(self.image_size_edit, 2, 1, 1, 1)
 
-        self.quick_pause_edit.setObjectName("quick_pause_edit")
-        # TODO : add support for quick pause
-        self.quick_pause_edit.setEnabled(False)
-        self.quick_pause_edit.setToolTip('Not supported yet.')
-        self.gridLayout_2.addWidget(self.quick_pause_edit, 4, 1, 1, 1)
-
-        self.quick_recover_edit.setObjectName("quick_recover_edit")
-        # TODO : add support for quick recover
-        self.quick_recover_edit.setEnabled(False)
-        self.quick_recover_edit.setToolTip('Not supported yet.')
-        self.gridLayout_2.addWidget(self.quick_recover_edit, 5, 1, 1, 1)
-
         self.log_path_edit.setObjectName("log_path_edit")
         self.log_path_edit.setToolTip('Not supported yet.')
         self.log_path_edit.setEnabled(False)
@@ -275,9 +258,6 @@ class OptionWindow(QMainWindow):
         self.hot_key_edit.setObjectName("hot_key_edit")
         self.gridLayout_4.addWidget(self.hot_key_edit, 7, 1, 1, 1)
 
-        # self.multi_key_mode_checkbox.setObjectName("multi_key_mode_checkbox")
-        # self.gridLayout_4.addWidget(self.multi_key_mode_checkbox, 8, 1, 1, 1)
-
         self.hot_key_mode_radiobutton.setObjectName("radioButton_2")
         self.gridLayout_4.addWidget(self.hot_key_mode_radiobutton, 6, 0, 1, 1)
 
@@ -290,7 +270,7 @@ class OptionWindow(QMainWindow):
         self.trigger_key_edit.setToolTip('space is the only supported key for now')
         self.gridLayout_4.addWidget(self.trigger_key_edit, 2, 1, 1, 1)
 
-        self.gridLayout_4.addWidget(self.label_2, 2, 0, 1, 1)
+        self.gridLayout_4.addWidget(self.trigger_key_label, 2, 0, 1, 1)
 
         self.keyword_replace_mode_radiobutton.setObjectName("radioButton")
         self.gridLayout_4.addWidget(self.keyword_replace_mode_radiobutton, 0, 0, 1, 1)
@@ -299,24 +279,32 @@ class OptionWindow(QMainWindow):
         self.timeout_edit.setValidator(QIntValidator())
         self.gridLayout_4.addWidget(self.timeout_edit, 3, 1, 1, 1)
 
-        self.gridLayout_4.addWidget(self.label_5, 7, 0, 1, 1)
+        self.gridLayout_4.addWidget(self.hot_key_label, 7, 0, 1, 1)
 
         self.ignore_prefix_checkbox.setObjectName("ignore_prefix_checkbox")
         self.gridLayout_4.addWidget(self.ignore_prefix_checkbox, 4, 1, 1, 1)
 
-        # self.gridLayout_4.addWidget(self.label_6, 8, 0, 1, 1)
+        self.gridLayout_4.addWidget(self.substitute_keyword_label, 1, 0, 1, 1)
 
-        self.gridLayout_4.addWidget(self.label, 1, 0, 1, 1)
+        self.gridLayout_4.addWidget(self.timeout_label, 3, 0, 1, 1)
 
-        self.gridLayout_4.addWidget(self.label_4, 3, 0, 1, 1)
-
-        self.gridLayout_4.addWidget(self.label_3, 4, 0, 1, 1)
+        self.gridLayout_4.addWidget(self.ignore_prefix_label, 4, 0, 1, 1)
 
         self.line.setFrameShape(QtWidgets.QFrame.HLine)
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.gridLayout_4.addWidget(self.line, 5, 0, 1, 2)
         self.tabWidget.addTab(self.workmode_tab, "")
         self.verticalLayout.addWidget(self.tabWidget, 0, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+
+        self.gridLayout_5.setContentsMargins(10, 15, 5, 15)
+        self.gridLayout_5.setHorizontalSpacing(5)
+        self.gridLayout_5.setVerticalSpacing(10)
+
+        self.gridLayout_5.addWidget(self.directory_label, 0, 0, 1, 1)
+        self.save_directory_edit.setObjectName('save_directory_edit')
+        self.gridLayout_5.addWidget(self.save_directory_edit, 0, 1, 1, 1)
+        self.browse_button.setObjectName('browse_button')
+        self.gridLayout_5.addWidget(self.browse_button, 0, 2, 1, 1)
 
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_2.setSpacing(0)
@@ -325,8 +313,18 @@ class OptionWindow(QMainWindow):
         self.reset_button.setMaximumSize(QtCore.QSize(70, 30))
         self.reset_button.setObjectName("reset_button")
         self.horizontalLayout_2.addWidget(self.reset_button)
-        spacer_item4 = QtWidgets.QSpacerItem(400, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacer_item4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacer_item4)
+
+        # loacl mode button between the reset and save buttons
+        self.on_or_offline_switch_button.setMinimumSize(QtCore.QSize(100, 30))
+        self.on_or_offline_switch_button.setMaximumSize(QtCore.QSize(100, 30))
+        self.on_or_offline_switch_button.setObjectName("local_mode_button")
+        self.on_or_offline_switch_button.setToolTip('Switch to offline mode, stores all image locally.')
+        self.horizontalLayout_2.addWidget(self.on_or_offline_switch_button)
+
+        spacer_item5 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_2.addItem(spacer_item5)
 
         self.save_button.setMinimumSize(QtCore.QSize(70, 30))
         self.save_button.setMaximumSize(QtCore.QSize(70, 30))
@@ -347,20 +345,16 @@ class OptionWindow(QMainWindow):
         self.domain_label.setText(_translate("MainWindow", "Domain"))
         self.status_label.setText(_translate("MainWindow", "TextLabel"))
         self.library_label.setText(_translate("MainWindow", "Library"))
-        self.quick_pause_label.setText(_translate("MainWindow", "Quick pause"))
         self.log_path_label.setText(_translate("MainWindow", "Log path"))
         self.image_size_label.setText(_translate("MainWindow", "Image size"))
-        self.quick_recover_label.setText(_translate("MainWindow", "Quick recover"))
         self.paste_format_label.setText(_translate("MainWindow", "Paste format"))
         self.image_format_label.setText(_translate("MainWindow", "Image format"))
-        self.label_2.setText(_translate("MainWindow", "Trigger Key"))
-        self.label_5.setText(_translate("MainWindow", "Hot Key"))
-        # self.label_6.setText(_translate("MainWindow", "Multi-key Mode"))
-        self.label.setText(_translate("MainWindow", "Substitute Keyword"))
-        self.label_4.setText(_translate("MainWindow", "Timeout"))
-        self.label_3.setText(_translate("MainWindow", "Ignore Prefix"))
-
-        self.domain_edit.setText(_translate("MainWindow", "http://"))
+        self.trigger_key_label.setText(_translate("MainWindow", "Trigger Key"))
+        self.hot_key_label.setText(_translate("MainWindow", "Hot Key"))
+        self.substitute_keyword_label.setText(_translate("MainWindow", "Substitute Keyword"))
+        self.timeout_label.setText(_translate("MainWindow", "Timeout"))
+        self.ignore_prefix_label.setText(_translate("MainWindow", "Ignore Prefix"))
+        self.directory_label.setText(_translate("MainWindow", "Save Directory"))
 
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.authorization_tab), _translate("MainWindow",
                                                                                              "Authorization"))
@@ -371,7 +365,9 @@ class OptionWindow(QMainWindow):
         self.keyword_replace_mode_radiobutton.setText(_translate("MainWindow", "Key word replace mode"))
 
         self.auth_check_button.setText(_translate("MainWindow", "Authenticate"))
+        self.browse_button.setText(_translate("MainWindow", "Browse"))
         self.reset_button.setText(_translate("MainWindow", "Reset"))
+        self.on_or_offline_switch_button.setText(_translate("MainWindow", "Offline mode"))
         self.save_button.setText(_translate("MainWindow", "Save"))
 
     def set_up_simple_interaction(self):
