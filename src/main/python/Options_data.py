@@ -154,6 +154,7 @@ class Options:
         """
         self.type: str = 'PNG'
         self.size: int = 1024
+        self.timeout = 5
         self.paste_format: str = r'![]({url})'
         self.log_save_path = self.get_default_path()
 
@@ -166,6 +167,7 @@ class Options:
         self.config_parser['general'] = {
             'type': self.type,
             'size': self.size,
+            'timeout': self.timeout,
             'paste_format': self.paste_format.replace('\n', '<&br />'),
             'log_path': self.log_save_path
         }
@@ -184,7 +186,6 @@ class Options:
         self.substitute_keyword = '@@'
         self.ignore_prefix = True
         self.trigger_key = 'space'
-        self.timeout = 200
         self.hot_key = 'f1'
         # self.multi_key_mode = False
 
@@ -198,7 +199,6 @@ class Options:
             'work_mode': self.work_mode.__str__(),
             'substitute_keyword': self.substitute_keyword,
             'ignore_prefix': self.ignore_prefix,
-            'timeout': self.timeout,
             'trigger_key': self.trigger_key,
             'hot_key': self.hot_key
             # 'multi_key_mode': self.multi_key_mode
@@ -265,6 +265,7 @@ class Options:
         """
         self.type = general_section.get('type', self.type)
         self.size = general_section.getint('size', self.size)
+        self.timeout = general_section.getint('timeout', self.timeout)
         self.paste_format = general_section.get('paste_format', self.paste_format).replace('<&br />', '\n')
         self.log_save_path = general_section.get('log_path', self.log_save_path)
 
@@ -284,7 +285,6 @@ class Options:
 
         self.substitute_keyword = work_mode_section.get('substitute_keyword', self.substitute_keyword)
         self.ignore_prefix = work_mode_section.getboolean('ignore_prefix', self.ignore_prefix)
-        self.timeout = work_mode_section.getint('timeout', self.timeout)
         self.trigger_key = work_mode_section.get('trigger_key', self.trigger_key)
         self.hot_key = work_mode_section.get('hot_key', self.hot_key)
 

@@ -31,6 +31,8 @@ import requests
 class OptionControl:
     def __init__(self, option_ref: Options):
         super().__init__()
+        # stores the lib-name -> lib-token pair
+        self.library_dict = {}
 
         self.option_window = OptionWindow()
         self.option_data = option_ref
@@ -57,7 +59,7 @@ class OptionControl:
 
         # shows the library label and combo box
         if _data.auth_token != '':
-            _window.status_label.setText('Auth Token:' + _data.auth_token)
+            _window.status_label.setText('Login succeed.')
             _window.status_label.setStyleSheet('QLabel#status_label {color: green}')
             _window.status_label.show()
             self.list_library()
@@ -113,9 +115,8 @@ class OptionControl:
         _data.domain = _window.domain_edit.text()
 
         # sets the auth token if already authenticated
-        if _window.status_label.text().startswith('Auth Token'):
-            _data.auth_token = _window.status_label.text().split(':')[-1]
-            _data.upload_repo_id = _window.library_comboBox.currentText().split(' ^-^ ')[-1]
+        if _window.status_label.text() == 'Login succeed.':
+            _data.upload_repo_id = self.library_dict[_window.library_comboBox.currentText()]
         else:
             _data.auth_token = ''
             _data.upload_repo_id = ''
@@ -152,7 +153,7 @@ class OptionControl:
             domain_edit.setText('http://' + domain_edit.text())
 
         try:
-            res = requests.get(domain_edit.text() + '/api2/ping/')
+            res = requests.get(domain_edit.text() + '/api2/ping/', timeout=self.option_data.timeout)
         except requests.exceptions.InvalidSchema as ex:
             self.option_window.pop_message_box('Url problems', ex.strerror)
         except requests.exceptions.ConnectionError as ex:
@@ -179,7 +180,9 @@ class OptionControl:
                                 data={
                                     'username': self.option_window.usr_edit.text(),
                                     'password': self.option_window.pwd_edit.text()
-                                })
+                                },
+                                timeout= self.option_data.timeout
+                                )
 
         # catch all exception with request session,
         except requests.exceptions.RequestException:
@@ -205,8 +208,9 @@ class OptionControl:
             res = requests.get(
                 url=self.option_window.domain_edit.text() + '/api2/repos/',
                 headers={
-                    'Authorization': 'Token {token}'.format(token=self.option_window.status_label.text().split(':')[-1])
-                }
+                    'Authorization': 'Token {token}'.format(token=self.option_data.auth_token)
+                },
+                timeout=self.option_data.timeout
             )
         except requests.exceptions.RequestException as ex:
             self.option_window.pop_message_box('Failed fetching libraries', ex.strerror)
@@ -221,21 +225,29 @@ class OptionControl:
         lib_combo_box.show()
         self.option_window.library_label.show()
 
+        temp_dict = {}
+        lib_combo_box.clear()
         # filter libraries make sure no duplicated library showed in combo box
         for item in res.json():
             repo_id = item['id']
             if repo_id not in repo_id_set:
-                combox_item = item['name'] + ' ^-^ ' + repo_id
+                combo_box_item = item['name']
+                lib_combo_box.addItem(combo_box_item)
 
-                # compares the id with that in log file( user's selection)
-                if self.option_data.upload_repo_id == repo_id:
-                    lib_combo_box.setCurrentText(combox_item)
+                temp_dict[combo_box_item] = repo_id
 
-                lib_combo_box.addItem(combox_item)
                 repo_id_set.append(repo_id)
 
-    def on_selection_changed(self, text: str):
-        self.option_data.upload_repo_id = text.split(' ^-^ ')[-1]
+        self.library_dict = temp_dict
+
+        for name, repo_id in self.library_dict.items():
+            if repo_id == self.option_data.upload_repo_id:
+                lib_combo_box.setCurrentText(name)
+                return
+
+        self.option_data.upload_repo_id = None
+        self.option_window.pop_message_box('Error', 'Library with id {repo_id} is missing.\nPlease re-select the '
+                                                    'upload library'.format(repo_id=self.option_data.upload_repo_id))
 
     def on_authenticate_check_clicked(self):
         """
@@ -254,7 +266,8 @@ class OptionControl:
             return
 
         self.option_window.status_label.show()
-        self.option_window.status_label.setText('Auth Token:' + token)
+        self.option_window.status_label.setText('Login succeed.')
+        self.option_data.auth_token = token
         self.option_window.status_label.setStyleSheet('QLabel#status_label {color: green}')
 
         self.list_library()

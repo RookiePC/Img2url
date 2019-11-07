@@ -214,7 +214,7 @@ class OptionWindow(QMainWindow):
 
         self.log_path_label.setMinimumSize(QtCore.QSize(85, 20))
         self.log_path_label.setMaximumSize(QtCore.QSize(85, 20))
-        self.gridLayout_2.addWidget(self.log_path_label, 6, 0, 1, 1)
+        self.gridLayout_2.addWidget(self.log_path_label, 7, 0, 1, 1)
 
         self.image_size_label.setMinimumSize(QtCore.QSize(85, 20))
         self.image_size_label.setMaximumSize(QtCore.QSize(85, 20))
@@ -222,7 +222,7 @@ class OptionWindow(QMainWindow):
 
         self.paste_format_label.setMinimumSize(QtCore.QSize(85, 20))
         self.paste_format_label.setMaximumSize(QtCore.QSize(85, 20))
-        self.gridLayout_2.addWidget(self.paste_format_label, 3, 0, 1, 1, QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        self.gridLayout_2.addWidget(self.paste_format_label, 4, 0, 1, 1, QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
 
         self.image_format_label.setMinimumSize(QtCore.QSize(85, 20))
         self.image_format_label.setMaximumSize(QtCore.QSize(85, 20))
@@ -242,10 +242,15 @@ class OptionWindow(QMainWindow):
         self.log_path_edit.setObjectName("log_path_edit")
         self.log_path_edit.setToolTip('Not supported yet.')
         self.log_path_edit.setEnabled(False)
-        self.gridLayout_2.addWidget(self.log_path_edit, 6, 1, 1, 1)
+        self.gridLayout_2.addWidget(self.log_path_edit, 7, 1, 1, 1)
+
+        self.timeout_edit.setObjectName("timeout_edit")
+        self.timeout_edit.setValidator(QIntValidator())
+        self.gridLayout_2.addWidget(self.timeout_edit, 3, 1, 1, 1)
+        self.gridLayout_2.addWidget(self.timeout_label, 3, 0, 1, 1)
 
         self.paste_format_edit.setObjectName("paste_format_edit")
-        self.gridLayout_2.addWidget(self.paste_format_edit, 3, 1, 1, 1)
+        self.gridLayout_2.addWidget(self.paste_format_edit, 4, 1, 1, 1)
         self.gridLayout_3.addLayout(self.gridLayout_2, 0, 0, 1, 1)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.tabWidget.addTab(self.general_tab, "")
@@ -256,10 +261,10 @@ class OptionWindow(QMainWindow):
         self.gridLayout_4.setHorizontalSpacing(0)
 
         self.hot_key_edit.setObjectName("hot_key_edit")
-        self.gridLayout_4.addWidget(self.hot_key_edit, 7, 1, 1, 1)
+        self.gridLayout_4.addWidget(self.hot_key_edit, 6, 1, 1, 1)
 
         self.hot_key_mode_radiobutton.setObjectName("radioButton_2")
-        self.gridLayout_4.addWidget(self.hot_key_mode_radiobutton, 6, 0, 1, 1)
+        self.gridLayout_4.addWidget(self.hot_key_mode_radiobutton, 5, 0, 1, 1)
 
         self.substitute_keyword_edit.setObjectName("substitute_keyword_edit")
         self.gridLayout_4.addWidget(self.substitute_keyword_edit, 1, 1, 1, 1)
@@ -275,24 +280,24 @@ class OptionWindow(QMainWindow):
         self.keyword_replace_mode_radiobutton.setObjectName("radioButton")
         self.gridLayout_4.addWidget(self.keyword_replace_mode_radiobutton, 0, 0, 1, 1)
 
-        self.timeout_edit.setObjectName("timeout_edit")
-        self.timeout_edit.setValidator(QIntValidator())
-        self.gridLayout_4.addWidget(self.timeout_edit, 3, 1, 1, 1)
+        # todo :dnlm
 
-        self.gridLayout_4.addWidget(self.hot_key_label, 7, 0, 1, 1)
+        #self.gridLayout_4.addWidget(self.timeout_edit, 3, 1, 1, 1)
+
+        self.gridLayout_4.addWidget(self.hot_key_label, 6, 0, 1, 1)
 
         self.ignore_prefix_checkbox.setObjectName("ignore_prefix_checkbox")
-        self.gridLayout_4.addWidget(self.ignore_prefix_checkbox, 4, 1, 1, 1)
+        self.gridLayout_4.addWidget(self.ignore_prefix_checkbox, 3, 1, 1, 1)
 
         self.gridLayout_4.addWidget(self.substitute_keyword_label, 1, 0, 1, 1)
 
-        self.gridLayout_4.addWidget(self.timeout_label, 3, 0, 1, 1)
+        #self.gridLayout_4.addWidget(self.timeout_label, 3, 0, 1, 1)
 
-        self.gridLayout_4.addWidget(self.ignore_prefix_label, 4, 0, 1, 1)
+        self.gridLayout_4.addWidget(self.ignore_prefix_label, 3, 0, 1, 1)
 
         self.line.setFrameShape(QtWidgets.QFrame.HLine)
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.gridLayout_4.addWidget(self.line, 5, 0, 1, 2)
+        self.gridLayout_4.addWidget(self.line, 4, 0, 1, 2)
         self.tabWidget.addTab(self.workmode_tab, "")
         self.verticalLayout.addWidget(self.tabWidget, 0, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
 

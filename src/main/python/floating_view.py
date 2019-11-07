@@ -151,6 +151,7 @@ class FloatingWidget(QtWidgets.QWidget):
         :param event:
         :return:
         """
+        self.tray_icon.hide()
         QCoreApplication.quit()
 
     def context_menu_help_clicked(self):
@@ -167,11 +168,11 @@ class FloatingWidget(QtWidgets.QWidget):
         :param event: for the interface only, not actually used inside the method
         :return: None
         """
-        if self.menu_action_hide.text() == 'hide':
-            self.menu_action_hide.setText('show')
+        if self.menu_action_hide.text() == 'Hide':
+            self.menu_action_hide.setText('Show')
             self.hide()
         else:
-            self.menu_action_hide.setText('hide')
+            self.menu_action_hide.setText('Hide')
             self.show()
 
     def init_tray_icon(self):

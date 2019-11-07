@@ -43,7 +43,8 @@ class ImageUploader:
         try:
             resp = requests.get(
                 self.option_data.domain + '/api2/repos/' + self.option_data.upload_repo_id + '/upload-link/',
-                headers={'Authorization': 'Token {token}'.format(token=self.option_data.auth_token)}
+                headers={'Authorization': 'Token {token}'.format(token=self.option_data.auth_token)},
+                timeout = self.option_data.timeout
             )
         except requests.exceptions.RequestException as ex:
             raise Exception('Failed during process with exception:' + ex.strerror)
@@ -69,6 +70,22 @@ class ImageUploader:
         :return: string, formatted time in yy-mm-dd
         """
         return datetime.datetime.now().strftime('%y-%m-%d')
+
+    @staticmethod
+    def ping_test(url, timeout=None) -> bool:
+        """
+        runs a ping test to the seafile server, could raise a timeout exception if no respond received within the given
+        timeout,
+        :param url: the server's url
+        :param timeout: default to None means no time restriction
+        :return: True if get 200 and a "pong" from server
+        """
+        res = requests.get(url=url + '/api2/ping/', timeout=timeout)
+
+        if res.status_code == 200 and res.text == '"pong"':
+            return True
+
+        return False
 
     def get_clipboard_img(self):
         """
@@ -104,7 +121,8 @@ class ImageUploader:
         res = requests.post(
             self.upload_link, data={'filename': image_name, 'parent_dir': '/'},
             files={'file': (image_name, image_content)},
-            headers={'Authorization': 'Token {token}'.format(token=self.option_data.auth_token)}
+            headers={'Authorization': 'Token {token}'.format(token=self.option_data.auth_token)},
+            timeout = self.option_data.timeout
         )
         if res.status_code == 200:
             return image_name
@@ -123,7 +141,7 @@ class ImageUploader:
         path = '/{file}'.format(file=image_name)
         token = 'Token {token}'.format(token=self.option_data.auth_token)
 
-        res = requests.put(url, data={'p': path}, headers={'Authorization': token})
+        res = requests.put(url, data={'p': path}, headers={'Authorization': token}, timeout=self.option_data.timeout)
 
         # all other status code would be treated as a process failure
         if res.status_code == 201:
@@ -185,6 +203,15 @@ class ImageUploader:
         :return: formatted url of image in clipboard
         """
         if not self.option_data.work_offline:
+
+            # before the upload action , do the ping test to avoid server is disconnected.
+            try:
+                if not self.ping_test(self.option_data.domain, self.option_data.timeout):
+                    raise Exception('Lost connection with the server.')
+            except requests.exceptions.RequestException as ex:
+                raise Exception('Something went wrong within the process of server connection test with'
+                                ' exception :' + ex.__str__())
+
             image_name = self.upload_image()
 
             shared_link = self.get_image_share_link(image_name)
