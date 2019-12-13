@@ -3,6 +3,11 @@
 A simple desktop for image inserting while writing markdown files.      
 When triggerd, this little application grab the image in clipboard, upload it to seafile server, get the share link, and format the url with pre-defined(custimizable) format string, and copy it to clipboar or replace the trigger keyword you just inputed in markdown file.
 
+<center>
+
+![example_1](http://thomaslulu.com:8000/f/0d3a02afa744486b8015/?dl=1)<br /><font color="#757575" size =1>example</font>
+</center>
+
 # Development & Dependencies
 - Python 3.6.8
 - PyQt5 5.13.0
@@ -26,9 +31,11 @@ When triggerd, this little application grab the image in clipboard, upload it to
 3. Start your Python IDE to run `img2url.py`.
 
 # Features
-- completely custimizable paste format for image url
-- supports hot-key trigger and keyword trigger, both hot-key and key-word are custimizeable.
-- cute floating dektop tool notification on current state.
+- Completely **custimizable paste format** for image url
+- Supports **hot-key trigger** and **keyword trigger**, both hot-key and key-word are custimizeable.
+- **Cute** floating dektop tool notification on current state.
+- **Migrates** images in makrdown files to another server or keep them local
+- support insert images **offline** and **resubmit** them all to server later
 
 # Known limitations
 * Grab image from clipboard only supports Windows/MacOS (for now)
