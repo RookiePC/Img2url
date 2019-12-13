@@ -24,13 +24,14 @@ SOFTWARE.
 import pyperclip
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal, QObject
-from Image_uploader import ImageUploader
-from floating_view import FloatingWidget, DisplayMode
-from Option_control import OptionControl
-from Options_data import WorkMode
+from Tools.ImageUploader import ImageUploader
+from Views.MainFloatingView import FloatingWidget, DisplayMode
+from Control.OptionWindowControl import OptionControl
+from OptionsData import WorkMode
 import keyboard
-import floating_view
+from Views import MainFloatingView
 import pynput
+from Control import MigratorControl
 
 
 class Img2url(QObject):
@@ -42,8 +43,16 @@ class Img2url(QObject):
         self.main_window = FloatingWidget(app_.primaryScreen())
         app_.setQuitOnLastWindowClosed(False)
         self.image_uploader = ImageUploader()
+
+        self.migrator_control = MigratorControl.MigratorControl(self.image_uploader)
+
+        # gets the option data object's reference from image_uploader object in which the option data is created
         self.option_data_ref = self.image_uploader.option_data
         self.option_control = OptionControl(self.image_uploader.option_data)
+        # sets up the workmode switch callback
+        self.option_control.notify_workmode_switch = self.on_workmode_switched
+
+        # calls the method to sync the data between views and models
         self.option_control.fill_data()
         self.option_window_ref = self.option_control.option_window
 
@@ -57,6 +66,9 @@ class Img2url(QObject):
         self.context_menu_unhook_ref = self.main_window.menu_action_unhook
 
         self.main_window.menu_action_options.triggered.connect(self.option_control.show_option_window)
+
+        self.main_window.menu_action_migrator_from_clipboard.triggered.connect(self.migrator_control.on_migrate_from_clipboard_clicked)
+        self.main_window.menu_action_migrator_from_file.triggered.connect(self.migrator_control.on_migrate_from_file_clicked)
 
         self.warning_signal.connect(self.main_window.pop_warning)
         self.error_signal.connect(self.main_window.pop_error)
@@ -142,6 +154,9 @@ class Img2url(QObject):
             except Exception as ex:
                 self.error_signal.emit('Reset Failed', ex.__str__())
 
+    def on_workmode_switched(self):
+        self.image_uploader.switch_mode_worker()
+
 
 class Img2urlState:
     def enter(self):
@@ -168,7 +183,7 @@ class UnhookState(Img2urlState):
         enters unhook state, the appearance and context menu is the only job for now
         :return: None
         """
-        self.context.main_window.switch_display(floating_view.DisplayMode.normal_no_hook)
+        self.context.main_window.switch_display(MainFloatingView.DisplayMode.normal_no_hook)
         self.context.context_menu_quick_hook_ref.setEnabled(True)
         self.context.context_menu_unhook_ref.setEnabled(False)
 
@@ -216,9 +231,10 @@ class UnhookHotKeyState(UnhookState):
 class HookState(Img2urlState):
     def __init__(self, context: Img2url):
         self.context = context
+        self.url_producer_proxy = self.context.image_uploader.get_formatted_link
 
     def enter(self):
-        self.context.main_window.switch_display(floating_view.DisplayMode.normal_hook_installed)
+        self.context.main_window.switch_display(MainFloatingView.DisplayMode.normal_hook_installed)
         self.context.context_menu_quick_hook_ref.setEnabled(False)
         self.context.context_menu_unhook_ref.setEnabled(True)
 
@@ -249,7 +265,7 @@ class KeywordHookState(HookState):
         :return: None
         """
         try:
-            formatted_url = self.context.image_uploader.image_to_url_core()
+            formatted_url = self.url_producer_proxy()
             if self.context.option_data_ref.platform == 'darwin':
                 replacement = formatted_url
                 # uses pynput to produce backspace because keyboard cant do that for now.
@@ -289,17 +305,17 @@ class HotKeyHookState(HookState):
         :return: None
         """
         try:
-            pyperclip.copy(self.context.image_uploader.image_to_url_core())
+            pyperclip.copy(self.url_producer_proxy())
         except Exception as ex:
             self.context.error_signal.emit('Core Process Failed', ex.__str__())
         else:
-            self.context.main_window.switch_display(floating_view.DisplayMode.ready_to_paste)
+            self.context.main_window.switch_display(MainFloatingView.DisplayMode.ready_to_paste)
             # only adds the hot key if no previous hot key exists
             if self.paste_handler is None:
                 self.paste_handler = keyboard.add_hotkey('ctrl+v', self.paste_callback)
 
     def paste_callback(self):
-        self.context.main_window.switch_display(floating_view.DisplayMode.normal_hook_installed)
+        self.context.main_window.switch_display(MainFloatingView.DisplayMode.normal_hook_installed)
         keyboard.remove_hotkey(self.paste_handler)
         self.paste_handler = None
 

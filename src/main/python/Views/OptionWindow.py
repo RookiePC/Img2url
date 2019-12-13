@@ -21,12 +21,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import sys
-
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIntValidator
-from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QMessageBox
 
 
 class OptionWindow(QMainWindow):
@@ -307,6 +305,7 @@ class OptionWindow(QMainWindow):
 
         self.gridLayout_5.addWidget(self.directory_label, 0, 0, 1, 1)
         self.save_directory_edit.setObjectName('save_directory_edit')
+        self.save_directory_edit.setReadOnly(True)
         self.gridLayout_5.addWidget(self.save_directory_edit, 0, 1, 1, 1)
         self.browse_button.setObjectName('browse_button')
         self.gridLayout_5.addWidget(self.browse_button, 0, 2, 1, 1)
@@ -437,6 +436,8 @@ class OptionWindow(QMainWindow):
 
 
 if __name__ == '__main__':
+    from PyQt5.QtWidgets import QApplication
+    import sys
     app = QApplication([])
     option_window = OptionWindow()
     option_window.show()

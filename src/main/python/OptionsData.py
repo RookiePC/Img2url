@@ -25,6 +25,7 @@ import os
 import sys
 import enum
 import configparser
+from Tools import ShareTools
 
 
 class WorkMode(enum.Enum):
@@ -116,7 +117,7 @@ class Options:
 
         # resets the image save path here since we don't actually stores it in config file
         # and it does not belong to any section we have
-        self.image_save_path = self.get_default_path()
+        self.image_save_path = ShareTools.get_default_path()
         self.work_offline = False
 
     def reset_authorization_settings(self):
@@ -131,7 +132,7 @@ class Options:
 
     def save_authorization_settings(self):
         """
-        updates(or sets if not exists) authorization settings in config objec
+        updates(or sets if not exists) authorization settings in config object
         does not trigger save to local action
         :return: None
         """
@@ -156,7 +157,7 @@ class Options:
         self.size: int = 1024
         self.timeout = 5
         self.paste_format: str = r'![]({url})'
-        self.log_save_path = self.get_default_path()
+        self.log_save_path = ShareTools.get_default_path()
 
     def save_general_settings(self):
         """
@@ -213,7 +214,7 @@ class Options:
         self.save_authorization_settings()
         self.save_general_settings()
         self.save_work_mode_settings()
-        with open(self.get_default_path() + os.sep + self.config_file_name, 'w') as config_file:
+        with open(ShareTools.get_default_path() + os.sep + self.config_file_name, 'w') as config_file:
             self.config_parser.write(config_file)
 
     def read_local_config_file(self) -> bool:
@@ -221,7 +222,7 @@ class Options:
         reads all local settings, returns the operation result
         :return: True if successfully loaded data, else False
         """
-        local_config_file = self.get_default_path() + os.sep + self.config_file_name
+        local_config_file = ShareTools.get_default_path() + os.sep + self.config_file_name
 
         # path check
         if not os.path.exists(local_config_file):
@@ -287,19 +288,6 @@ class Options:
         self.ignore_prefix = work_mode_section.getboolean('ignore_prefix', self.ignore_prefix)
         self.trigger_key = work_mode_section.get('trigger_key', self.trigger_key)
         self.hot_key = work_mode_section.get('hot_key', self.hot_key)
-
-    @staticmethod
-    def get_default_path() -> str:
-        """
-        returns the default path for config files to store
-        checks the path on each call, will create one if doesn't exists one
-        :return: the default path (existence checked)
-        """
-        default_path = os.path.expanduser('~') + os.path.sep + 'img2url'
-        if not os.path.exists(default_path):
-            # TODO: Handle the mkdir() failure
-            os.mkdir(default_path)
-        return default_path
 
 
 if __name__ == '__main__':

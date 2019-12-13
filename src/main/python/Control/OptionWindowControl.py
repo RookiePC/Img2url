@@ -23,8 +23,8 @@ SOFTWARE.
 """
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QFileDialog
-from OptionWindow import OptionWindow
-from Options_data import Options, WorkMode
+from Views.OptionWindow import OptionWindow
+from OptionsData import Options, WorkMode
 import requests
 
 
@@ -44,6 +44,8 @@ class OptionControl:
             'JPG',
             'BMP'
         ]
+
+        self.notify_workmode_switch = None
 
     def fill_data(self):
         """
@@ -181,7 +183,7 @@ class OptionControl:
                                     'username': self.option_window.usr_edit.text(),
                                     'password': self.option_window.pwd_edit.text()
                                 },
-                                timeout= self.option_data.timeout
+                                timeout=self.option_data.timeout
                                 )
 
         # catch all exception with request session,
@@ -312,7 +314,7 @@ class OptionControl:
     def on_switch_mode_clicked(self):
         """
         switch the online or offline mode
-        :return:
+        :return: None
         """
         auth_tab: QtWidgets.QWidget = self.option_window.authorization_tab
         local_mode_tab: QtWidgets.QWidget = self.option_window.local_mode_tab
@@ -352,3 +354,6 @@ class OptionControl:
             # change the flag
             self.option_data.work_offline = False
             switch_button.setText('Offline mode')
+
+        # notify the switch event through the callback
+        self.notify_workmode_switch()

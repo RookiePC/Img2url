@@ -21,15 +21,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import os
 import sys
 import enum
-from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtCore import Qt, QCoreApplication, QPoint
+from PyQt5 import QtWidgets, QtGui
+from PyQt5.QtCore import Qt, QPoint, QCoreApplication
 from PyQt5.QtGui import QPixmap, QImage, QCursor, QScreen, QIcon
-from PyQt5.QtWidgets import QLabel, QGraphicsDropShadowEffect, QMenu, QSystemTrayIcon, QMessageBox, QDesktopWidget
+from PyQt5.QtWidgets import QLabel, QGraphicsDropShadowEffect, QMenu, QSystemTrayIcon
+from Views import QtPopComponent
 
-import resource
+# must import Views/resouce.py or assets will be lost
+from Views import resource
 
 
 class DisplayMode(enum.Enum):
@@ -39,11 +40,9 @@ class DisplayMode(enum.Enum):
     cant_work_normally = 3
 
 
-class FloatingWidget(QtWidgets.QWidget):
+class FloatingWidget(QtWidgets.QWidget, QtPopComponent.QtPopComponent):
     def __init__(self, screen: QScreen):
         super().__init__()
-        print(os.getcwd())
-
         self.icon_resource_root = ':display/'
 
         # sets the name of all icon file
@@ -67,6 +66,9 @@ class FloatingWidget(QtWidgets.QWidget):
         self.menu_action_options = None
         self.menu_action_quick_hook = None
         self.menu_action_unhook = None
+        self.menu_action_migrator = None
+        self.menu_action_migrator_from_file = None
+        self.menu_action_migrator_from_clipboard = None
         self.menu_action_quit = None
         self.context_menu = None
         self.init_context_menu()
@@ -121,6 +123,10 @@ class FloatingWidget(QtWidgets.QWidget):
         self.menu_action_unhook = self.context_menu.addAction('Unhook')
         self.menu_action_hide = self.context_menu.addAction('Hide')
         menu_action_help = self.context_menu.addAction('Help')
+        self.menu_action_migrator = self.context_menu.addMenu('Migrator')
+        self.menu_action_migrator_from_file = self.menu_action_migrator.addAction('Migrate from file')
+        self.menu_action_migrator_from_clipboard = self.menu_action_migrator.addAction('Migrate from clipboard')
+
         self.menu_action_quit = self.context_menu.addAction('Quit')
 
         self.menu_action_unhook.setEnabled(False)
@@ -148,7 +154,6 @@ class FloatingWidget(QtWidgets.QWidget):
     def context_menu_quit_clicked(self):
         """
         does the job before quit.
-        :param event:
         :return:
         """
         self.tray_icon.hide()
@@ -157,7 +162,6 @@ class FloatingWidget(QtWidgets.QWidget):
     def context_menu_help_clicked(self):
         """
         shows help as it supposed to do, not implemented yet( TODO: fill this function)
-        :param event:
         :return: None
         """
         print('help clicked')
@@ -165,7 +169,6 @@ class FloatingWidget(QtWidgets.QWidget):
     def context_menu_hide_clicked(self):
         """
         respond to the hide context menu click event
-        :param event: for the interface only, not actually used inside the method
         :return: None
         """
         if self.menu_action_hide.text() == 'Hide':
@@ -186,47 +189,11 @@ class FloatingWidget(QtWidgets.QWidget):
         # self.tray_icon.showMessage("test", "hello there!", QSystemTrayIcon.Information, 500)
         self.tray_icon.setToolTip('Still living')
 
-    @QtCore.pyqtSlot(str, str)
-    def pop_warning(self, title: str, message: str):
-        """
-        for outer thread's signal call to display a warning window
-        :param message: message to display in message box
-        :param title: title for message box window
-        :return:
-        """
-        self.pop_window(title, message, QMessageBox.Warning)
-
-    @QtCore.pyqtSlot(str, str)
-    def pop_error(self, title: str, message: str):
-        """
-        for outer thread's sinal call to display a error window
-        :param message: message to display in message box
-        :param title: title for message box window
-        :return:
-        """
-        self.pop_window(title, message, QMessageBox.Critical)
-
-    def pop_window(self, title: str, message: str, icon: QMessageBox.Icon):
-        """
-        pop a message box with given parameters
-        :param title:
-        :param message:
-        :param icon:
-        :return:
-        """
-        pop = QMessageBox(self)
-        pop.setIcon(icon)
-        pop.setWindowTitle(title)
-        pop.move(QDesktopWidget().availableGeometry().center())
-        pop.setText(message)
-        pop.exec_()
-
     def show_tray_icon_message(self, title: str, message: str, time: int = 300):
         """
         pops message on tray icon with given parameters
         :param title:
         :param message:
-        :param mode:
         :param time: default to 300 m-seconds
         :return: None
         """
@@ -278,15 +245,11 @@ class FloatingWidget(QtWidgets.QWidget):
         self.setCursor(QCursor(Qt.ArrowCursor))
         event.accept()
 
-    def keyPressEvent(self, event: QtGui.QKeyEvent):
-        if event.key() == Qt.Key_Escape:
-            QCoreApplication.quit()
-
 
 if __name__ == "__main__":
-     app = QtWidgets.QApplication([])
+    app = QtWidgets.QApplication([])
 
-     widget = FloatingWidget(app.primaryScreen())
-     widget.show()
+    widget = FloatingWidget(app.primaryScreen())
+    widget.show()
 
-     sys.exit(app.exec_())
+    sys.exit(app.exec_())
