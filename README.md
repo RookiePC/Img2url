@@ -1,7 +1,9 @@
 # Img2url
 
 A simple desktop tool for image inserting while writing markdown files.      
-When triggerd, this little application grab the image in clipboard, upload it to seafile server, get the share link, and format the url with pre-defined(custimizable) format string, and copy it to clipboar or replace the trigger keyword you just inputed in markdown file.
+When triggerd, this little application grab the image in clipboard, upload it to seafile server, get the share link, and format the url with pre-defined(custimizable) format string, and copy it to clipboard or replace the trigger keyword you just inputed in markdown file.
+And it also provides the **Local Work Mode** which allows you to **insert images without internet**, and it also provide the function that help **migrate all images in a markdown file**, to another directory on your system or some other seafile server!
+
 
 <center>
 
